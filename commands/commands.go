@@ -6,6 +6,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/commands/economy"
 	"github.com/RhykerWells/asbwig/commands/invite"
+	"github.com/RhykerWells/asbwig/commands/moderation"
 	"github.com/RhykerWells/asbwig/commands/ping"
 
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
@@ -27,5 +28,6 @@ func InitCommands(session *discordgo.Session) {
 	)
 
 	economy.EconomySetup(cmdHandler)
+	moderation.ModerationSetup(cmdHandler)
 	session.AddHandler(cmdHandler.HandleMessageCreate)
 }
