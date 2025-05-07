@@ -11,13 +11,17 @@ var (
 		Name:        "General",
 		Description: "General bot commands",
 	}
-	CategoryOwner = CommandCategory {
+	CategoryOwner = CommandCategory{
 		Name: "Owner",
 		Description: "Mainanance and other bot-owner commands",
 	}
-	CategoryEconomy = CommandCategory {
+	CategoryEconomy = CommandCategory{
 		Name: "Economy",
 		Description: "Gambling and other economy based commands",
+	}
+	CategoryModeration = CommandCategory{
+		Name: "Moderation",
+		Description: "Moderation and guild safety",
 	}
 )
 
