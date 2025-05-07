@@ -5,9 +5,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/RhykerWells/asbwig/commands/economy"
-	"github.com/RhykerWells/asbwig/commands/invite"
 	"github.com/RhykerWells/asbwig/commands/moderation"
-	"github.com/RhykerWells/asbwig/commands/ping"
+	
+	"github.com/RhykerWells/asbwig/commands/standard/invite"
+	"github.com/RhykerWells/asbwig/commands/standard/ping"
 
 	"github.com/RhykerWells/asbwig/commands/botOwner/setstatus"
 )
