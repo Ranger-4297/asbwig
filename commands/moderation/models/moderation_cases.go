@@ -24,77 +24,72 @@ import (
 
 // ModerationCase is an object representing the database table.
 type ModerationCase struct {
-	CaseID          int         `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
-	GuildID         string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	StaffID         string      `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
-	OffenderID      string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
-	Reason          null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
-	Action          string      `boil:"action" json:"action" toml:"action" yaml:"action"`
-	ActionedChannel string      `boil:"actioned_channel" json:"actioned_channel" toml:"actioned_channel" yaml:"actioned_channel"`
-	Time            null.Time   `boil:"time" json:"time,omitempty" toml:"time" yaml:"time,omitempty"`
+	CaseID     int64       `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
+	GuildID    string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	StaffID    string      `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
+	OffenderID string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
+	Reason     null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
+	Action     string      `boil:"action" json:"action" toml:"action" yaml:"action"`
+	Loglink    null.String `boil:"loglink" json:"loglink,omitempty" toml:"loglink" yaml:"loglink,omitempty"`
 
 	R *moderationCaseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationCaseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationCaseColumns = struct {
-	CaseID          string
-	GuildID         string
-	StaffID         string
-	OffenderID      string
-	Reason          string
-	Action          string
-	ActionedChannel string
-	Time            string
+	CaseID     string
+	GuildID    string
+	StaffID    string
+	OffenderID string
+	Reason     string
+	Action     string
+	Loglink    string
 }{
-	CaseID:          "case_id",
-	GuildID:         "guild_id",
-	StaffID:         "staff_id",
-	OffenderID:      "offender_id",
-	Reason:          "reason",
-	Action:          "action",
-	ActionedChannel: "actioned_channel",
-	Time:            "time",
+	CaseID:     "case_id",
+	GuildID:    "guild_id",
+	StaffID:    "staff_id",
+	OffenderID: "offender_id",
+	Reason:     "reason",
+	Action:     "action",
+	Loglink:    "loglink",
 }
 
 var ModerationCaseTableColumns = struct {
-	CaseID          string
-	GuildID         string
-	StaffID         string
-	OffenderID      string
-	Reason          string
-	Action          string
-	ActionedChannel string
-	Time            string
+	CaseID     string
+	GuildID    string
+	StaffID    string
+	OffenderID string
+	Reason     string
+	Action     string
+	Loglink    string
 }{
-	CaseID:          "moderation_cases.case_id",
-	GuildID:         "moderation_cases.guild_id",
-	StaffID:         "moderation_cases.staff_id",
-	OffenderID:      "moderation_cases.offender_id",
-	Reason:          "moderation_cases.reason",
-	Action:          "moderation_cases.action",
-	ActionedChannel: "moderation_cases.actioned_channel",
-	Time:            "moderation_cases.time",
+	CaseID:     "moderation_cases.case_id",
+	GuildID:    "moderation_cases.guild_id",
+	StaffID:    "moderation_cases.staff_id",
+	OffenderID: "moderation_cases.offender_id",
+	Reason:     "moderation_cases.reason",
+	Action:     "moderation_cases.action",
+	Loglink:    "moderation_cases.loglink",
 }
 
 // Generated where
 
-type whereHelperint struct{ field string }
+type whereHelperint64 struct{ field string }
 
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint) IN(slice []int) qm.QueryMod {
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelperint) NIN(slice []int) qm.QueryMod {
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -189,48 +184,22 @@ func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
 func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var ModerationCaseWhere = struct {
-	CaseID          whereHelperint
-	GuildID         whereHelperstring
-	StaffID         whereHelperstring
-	OffenderID      whereHelperstring
-	Reason          whereHelpernull_String
-	Action          whereHelperstring
-	ActionedChannel whereHelperstring
-	Time            whereHelpernull_Time
+	CaseID     whereHelperint64
+	GuildID    whereHelperstring
+	StaffID    whereHelperstring
+	OffenderID whereHelperstring
+	Reason     whereHelpernull_String
+	Action     whereHelperstring
+	Loglink    whereHelpernull_String
 }{
-	CaseID:          whereHelperint{field: "\"moderation_cases\".\"case_id\""},
-	GuildID:         whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
-	StaffID:         whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
-	OffenderID:      whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
-	Reason:          whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
-	Action:          whereHelperstring{field: "\"moderation_cases\".\"action\""},
-	ActionedChannel: whereHelperstring{field: "\"moderation_cases\".\"actioned_channel\""},
-	Time:            whereHelpernull_Time{field: "\"moderation_cases\".\"time\""},
+	CaseID:     whereHelperint64{field: "\"moderation_cases\".\"case_id\""},
+	GuildID:    whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
+	StaffID:    whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
+	OffenderID: whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
+	Reason:     whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
+	Action:     whereHelperstring{field: "\"moderation_cases\".\"action\""},
+	Loglink:    whereHelpernull_String{field: "\"moderation_cases\".\"loglink\""},
 }
 
 // ModerationCaseRels is where relationship names are stored.
@@ -261,9 +230,9 @@ func (r *moderationCaseR) GetGuild() *ModerationConfig {
 type moderationCaseL struct{}
 
 var (
-	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "actioned_channel", "time"}
-	moderationCaseColumnsWithoutDefault = []string{"guild_id", "staff_id", "offender_id", "action", "actioned_channel"}
-	moderationCaseColumnsWithDefault    = []string{"case_id", "reason", "time"}
+	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "loglink"}
+	moderationCaseColumnsWithoutDefault = []string{"guild_id", "staff_id", "offender_id", "action"}
+	moderationCaseColumnsWithDefault    = []string{"case_id", "reason", "loglink"}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}
 )
@@ -569,13 +538,13 @@ func ModerationCases(mods ...qm.QueryMod) moderationCaseQuery {
 }
 
 // FindModerationCaseG retrieves a single record by ID.
-func FindModerationCaseG(ctx context.Context, guildID string, caseID int, selectCols ...string) (*ModerationCase, error) {
+func FindModerationCaseG(ctx context.Context, guildID string, caseID int64, selectCols ...string) (*ModerationCase, error) {
 	return FindModerationCase(ctx, boil.GetContextDB(), guildID, caseID, selectCols...)
 }
 
 // FindModerationCase retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindModerationCase(ctx context.Context, exec boil.ContextExecutor, guildID string, caseID int, selectCols ...string) (*ModerationCase, error) {
+func FindModerationCase(ctx context.Context, exec boil.ContextExecutor, guildID string, caseID int64, selectCols ...string) (*ModerationCase, error) {
 	moderationCaseObj := &ModerationCase{}
 
 	sel := "*"
@@ -1101,12 +1070,12 @@ func (o *ModerationCaseSlice) ReloadAll(ctx context.Context, exec boil.ContextEx
 }
 
 // ModerationCaseExistsG checks if the ModerationCase row exists.
-func ModerationCaseExistsG(ctx context.Context, guildID string, caseID int) (bool, error) {
+func ModerationCaseExistsG(ctx context.Context, guildID string, caseID int64) (bool, error) {
 	return ModerationCaseExists(ctx, boil.GetContextDB(), guildID, caseID)
 }
 
 // ModerationCaseExists checks if the ModerationCase row exists.
-func ModerationCaseExists(ctx context.Context, exec boil.ContextExecutor, guildID string, caseID int) (bool, error) {
+func ModerationCaseExists(ctx context.Context, exec boil.ContextExecutor, guildID string, caseID int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"moderation_cases\" where \"guild_id\"=$1 AND \"case_id\"=$2 limit 1)"
 
