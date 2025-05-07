@@ -8,3 +8,5 @@ dbname = "asbwig"
 user="asbwig"
 pass="icantsee"
 sslmode = "disable"
+
+whitelist = ["core_config"]
