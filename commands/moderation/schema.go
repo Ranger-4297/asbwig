@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS moderation_config (
 );
 `,`
 CREATE TABLE IF NOT EXISTS moderation_cases (
-	case_id BIGSERIAL NOT NULL,
+	case_id BIGINT NOT NULL,
 	guild_id TEXT,
 	staff_id TEXT NOT NULL,
 	offender_id TEXT NOT NULL,

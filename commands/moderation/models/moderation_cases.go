@@ -231,8 +231,8 @@ type moderationCaseL struct{}
 
 var (
 	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "loglink"}
-	moderationCaseColumnsWithoutDefault = []string{"guild_id", "staff_id", "offender_id", "action"}
-	moderationCaseColumnsWithDefault    = []string{"case_id", "reason", "loglink"}
+	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action"}
+	moderationCaseColumnsWithDefault    = []string{"reason", "loglink"}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}
 )
