@@ -22,9 +22,9 @@ var warnCommand = &dcommand.AsbwigCommand{
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
 		offender, _ := functions.GetMember(data.GuildID, data.Args[0])
 		warnReason := strings.Join(data.Args[1:], " ")
-		err := logCase(data.GuildID, *author, *offender, warnReason, logWarn, data.ChannelID)
+		err := logCase(data.GuildID, *author, *offender, logWarn, data.ChannelID, warnReason)
 		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "I can't access or send messages in the modlog channel. Can't run command", 30*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 30*time.Second)
 			return
 		}
 	}),

@@ -10,6 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -22,9 +23,9 @@ var (
 	logWarn   = logAction{Name: "Warned", Colour: 0xFCA253}
 	logMute   = logAction{Name: "Muted", Colour: 0x5772BE}
 	logUnmute = logAction{Name: "Unmuted", Colour: common.SuccessGreen}
-	logKick   = logAction{Name: "Kicked", Colour: 0xFCA253}
-	logBan    = logAction{Name: "Banned", Colour: common.SuccessGreen}
-	loguUban  = logAction{Name: "Unbanned", Colour: 0xFCA253}
+	logKick   = logAction{Name: "Kicked", Colour: 0xF2A013}
+	logBan    = logAction{Name: "Banned", Colour: 0xD64848}
+	logUnban  = logAction{Name: "Unbanned", Colour: common.SuccessGreen}
 )
 
 const (
@@ -34,6 +35,74 @@ const (
 	channelEmoji string = "<:Channel:1369743815887294687>"
 	reasonEmoji  string = "<:Reason:1369744280310124624>"
 )
+
+// Case generation
+
+// setupModerationCase returns the models.ModerationCase struct of data to insert into the database
+func caseUpsert(caseID int64, guildID, staffID, offenderID, reason, loglink string, action logAction) error {
+	moderationCase := models.ModerationCase{
+		CaseID: caseID,
+		GuildID: guildID,
+		StaffID: staffID,
+		OffenderID: offenderID,
+		Reason: null.StringFrom(reason),
+		Action: action.Name,
+		Loglink: loglink,
+	}
+	
+	return addCase(guildID, moderationCase)
+}
+
+// getNewCaseID returns the caseID for the currentCase
+func getNewCaseID(guildID string) int64 {
+	guild, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	currentCaseID := guild.LastCaseID + 1
+	return currentCaseID
+}
+
+// incrementCaseID increments the guilds caseID. This is only used once everything else is successful. Such as posting the log and setting up the case data.
+func incrementCaseID(guildID string) error {
+	guild, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	guild.LastCaseID++
+	_, err := guild.Update(context.Background(), common.PQ, boil.Infer())
+	return err
+}
+
+// addCase adds the case to the database and runs incrementCaseID.
+func addCase(guildID string, caseData models.ModerationCase) error {
+	err := caseData.Insert(context.Background(), common.PQ, boil.Infer())
+	if err != nil {
+		return err
+	}
+	err = incrementCaseID(guildID)
+	if err != nil {
+		removeFailedCase(caseData)
+		return err
+	}
+	return nil
+}
+
+func removeFailedCase(caseData models.ModerationCase) {
+	caseData.Delete(context.Background(), common.PQ)
+}
+
+// Log generation
+
+func logCase(guildID string, Author, Offender discordgo.Member, action logAction, currentChannel, reason string) error {
+	logChannel, err := getGuildModLogChannel(guildID)
+	if err != nil {
+		return err
+	}
+	caseID := getNewCaseID(guildID)
+	embed := logEmbed(Author.User, Offender.User, caseID, action, currentChannel, reason)
+	message, err := functions.SendMessage(logChannel, &discordgo.MessageSend{Embed: embed})
+	if err != nil {
+		return err
+	}
+	loglink := generateLogLink(guildID, logChannel, message.ID)
+	caseUpsert(caseID, guildID, Author.User.ID, Offender.User.ID, reason, loglink, action)
+	return nil
+}
 
 // logEmbed returns the fully-populated embed for moderation logging
 func logEmbed(author, user *discordgo.User, caseNumber int64, action logAction, channelID, reason string) *discordgo.MessageEmbed {
@@ -48,63 +117,8 @@ func logEmbed(author, user *discordgo.User, caseNumber int64, action logAction, 
 	}
 }
 
-func logCase(guildID string, Author, Offender discordgo.Member, reason string, action logAction, currentChannel string) error {
-	var logChannel string
-	query := `SELECT mod_log FROM moderation_config WHERE guild_id=$1`
-
-	err := common.PQ.QueryRow(query, guildID).Scan(&logChannel)
-	if err != nil {
-		return err
-	}
-
-	caseData := setupModerationCase(guildID, Author.User.ID, Offender.User.ID, reason, action)
-	embed := logEmbed(Author.User, Offender.User, caseData.CaseID, action, currentChannel, reason)
-	message, err := functions.SendMessage(logChannel, &discordgo.MessageSend{Embed: embed})
-	if err != nil {
-		removeErroneousCase(guildID, caseData.CaseID)
-		return err
-	}
-	logLinkToCase(caseData, message.ChannelID, message.ID)
-	return nil
-}
-
-func setupModerationCase(guildID, staffID, offenderID, reason string, action logAction) (caseData models.ModerationCase) {
-	currentCaseNumber := getCurrentCaseNumber(guildID) + 1
-	moderationCase := models.ModerationCase{
-		CaseID: currentCaseNumber,
-		GuildID: guildID,
-		StaffID: staffID,
-		OffenderID: offenderID,
-		Reason: null.StringFrom(reason),
-		Action: action.Name,
-	}
-
-	moderationCase.Insert(context.Background(), common.PQ, boil.Infer())
-	return moderationCase
-}
-
-func getCurrentCaseNumber(guildID string) int64 {
-	var currentCaseID int64
-	query := `SELECT COALESCE(MAX(case_id), 0) FROM moderation_cases WHERE guild_id=$1`
-	err := common.PQ.QueryRow(query, guildID).Scan(&currentCaseID)
-	if err != nil {
-		// No cases
-		currentCaseID = 0
-	}
-	return currentCaseID
-}
-
-func logLinkToCase(caseData models.ModerationCase, channelID, messageID string) {
-	link := generateLogLink(caseData.GuildID, channelID, messageID)
-	caseData.Loglink = null.StringFrom(link)
-	caseData.Update(context.Background(), common.PQ, boil.Infer())
-}
-
+// generateLogLink returns the full messageURL of the modlog entry
 func generateLogLink(guildID, channelID, messageID string) string {
 	link := fmt.Sprintf("https://discord.com/channels/%s/%s/%s", guildID, channelID, messageID)
 	return link
-}
-
-func removeErroneousCase(guildID string, caseID int64) {
-
 }
