@@ -39,12 +39,12 @@ const (
 // Case generation
 
 // setupModerationCase returns the models.ModerationCase struct of data to insert into the database
-func caseUpsert(caseID int64, guildID, staffID, offenderID, reason, loglink string, action logAction) error {
+func caseUpsert(caseID int64, guildID, staffID, targetID, reason, loglink string, action logAction) error {
 	moderationCase := models.ModerationCase{
 		CaseID: caseID,
 		GuildID: guildID,
 		StaffID: staffID,
-		OffenderID: offenderID,
+		OffenderID: targetID,
 		Reason: null.StringFrom(reason),
 		Action: action.Name,
 		Loglink: loglink,
@@ -88,31 +88,31 @@ func removeFailedCase(caseData models.ModerationCase) {
 
 // Log generation
 
-func logCase(guildID string, Author, Offender discordgo.Member, action logAction, currentChannel, reason string) error {
+func logCase(guildID string, Author, Target discordgo.Member, action logAction, currentChannel, reason string) error {
 	logChannel, err := getGuildModLogChannel(guildID)
 	if err != nil {
 		return err
 	}
 	caseID := getNewCaseID(guildID)
-	embed := logEmbed(Author.User, Offender.User, caseID, action, currentChannel, reason)
+	embed := logEmbed(Author.User, Target.User, caseID, action, currentChannel, reason)
 	message, err := functions.SendMessage(logChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
 		return err
 	}
 	loglink := generateLogLink(guildID, logChannel, message.ID)
-	caseUpsert(caseID, guildID, Author.User.ID, Offender.User.ID, reason, loglink, action)
+	caseUpsert(caseID, guildID, Author.User.ID, Target.User.ID, reason, loglink, action)
 	return nil
 }
 
 // logEmbed returns the fully-populated embed for moderation logging
-func logEmbed(author, user *discordgo.User, caseNumber int64, action logAction, channelID, reason string) *discordgo.MessageEmbed {
+func logEmbed(author, target *discordgo.User, caseNumber int64, action logAction, channelID, reason string) *discordgo.MessageEmbed {
 	humanReadableCaseNumber := humanize.Comma(caseNumber)
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    fmt.Sprintf("%s (ID %s)", author.Username, author.ID),
 			IconURL: author.AvatarURL("1024"),
 		},
-		Description: fmt.Sprintf("%s **Case number:** %s\n%s **Who:** %s `(ID %s)`\n%s **Action:** %s\n%s **Channel:** <#%s>\n%s **Reason:** %s", caseEmoji, humanReadableCaseNumber, userEmoji, user.Mention(), user.ID, actionEmoji, action.Name, channelEmoji, channelID, reasonEmoji, reason),
+		Description: fmt.Sprintf("%s **Case number:** %s\n%s **Who:** %s `(ID %s)`\n%s **Action:** %s\n%s **Channel:** <#%s>\n%s **Reason:** %s", caseEmoji, humanReadableCaseNumber, userEmoji, target.Mention(), target.ID, actionEmoji, action.Name, channelEmoji, channelID, reasonEmoji, reason),
 		Color: action.Colour,
 	}
 }
