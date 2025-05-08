@@ -30,7 +30,7 @@ type ModerationCase struct {
 	OffenderID string      `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
 	Reason     null.String `boil:"reason" json:"reason,omitempty" toml:"reason" yaml:"reason,omitempty"`
 	Action     string      `boil:"action" json:"action" toml:"action" yaml:"action"`
-	Loglink    null.String `boil:"loglink" json:"loglink,omitempty" toml:"loglink" yaml:"loglink,omitempty"`
+	Loglink    string      `boil:"loglink" json:"loglink" toml:"loglink" yaml:"loglink"`
 
 	R *moderationCaseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationCaseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -191,7 +191,7 @@ var ModerationCaseWhere = struct {
 	OffenderID whereHelperstring
 	Reason     whereHelpernull_String
 	Action     whereHelperstring
-	Loglink    whereHelpernull_String
+	Loglink    whereHelperstring
 }{
 	CaseID:     whereHelperint64{field: "\"moderation_cases\".\"case_id\""},
 	GuildID:    whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
@@ -199,7 +199,7 @@ var ModerationCaseWhere = struct {
 	OffenderID: whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
 	Reason:     whereHelpernull_String{field: "\"moderation_cases\".\"reason\""},
 	Action:     whereHelperstring{field: "\"moderation_cases\".\"action\""},
-	Loglink:    whereHelpernull_String{field: "\"moderation_cases\".\"loglink\""},
+	Loglink:    whereHelperstring{field: "\"moderation_cases\".\"loglink\""},
 }
 
 // ModerationCaseRels is where relationship names are stored.
@@ -231,8 +231,8 @@ type moderationCaseL struct{}
 
 var (
 	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "loglink"}
-	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action"}
-	moderationCaseColumnsWithDefault    = []string{"reason", "loglink"}
+	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "action", "loglink"}
+	moderationCaseColumnsWithDefault    = []string{"reason"}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}
 )

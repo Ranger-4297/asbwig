@@ -24,37 +24,44 @@ import (
 
 // ModerationConfig is an object representing the database table.
 type ModerationConfig struct {
-	GuildID string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	ModLog  null.String `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
+	GuildID    string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	ModLog     null.String `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
+	LastCaseID int64       `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationConfigColumns = struct {
-	GuildID string
-	ModLog  string
+	GuildID    string
+	ModLog     string
+	LastCaseID string
 }{
-	GuildID: "guild_id",
-	ModLog:  "mod_log",
+	GuildID:    "guild_id",
+	ModLog:     "mod_log",
+	LastCaseID: "last_case_id",
 }
 
 var ModerationConfigTableColumns = struct {
-	GuildID string
-	ModLog  string
+	GuildID    string
+	ModLog     string
+	LastCaseID string
 }{
-	GuildID: "moderation_config.guild_id",
-	ModLog:  "moderation_config.mod_log",
+	GuildID:    "moderation_config.guild_id",
+	ModLog:     "moderation_config.mod_log",
+	LastCaseID: "moderation_config.last_case_id",
 }
 
 // Generated where
 
 var ModerationConfigWhere = struct {
-	GuildID whereHelperstring
-	ModLog  whereHelpernull_String
+	GuildID    whereHelperstring
+	ModLog     whereHelpernull_String
+	LastCaseID whereHelperint64
 }{
-	GuildID: whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
-	ModLog:  whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
+	GuildID:    whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
+	ModLog:     whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
+	LastCaseID: whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
 }
 
 // ModerationConfigRels is where relationship names are stored.
@@ -85,9 +92,9 @@ func (r *moderationConfigR) GetGuildModerationCases() ModerationCaseSlice {
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "mod_log"}
+	moderationConfigAllColumns            = []string{"guild_id", "mod_log", "last_case_id"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"mod_log"}
+	moderationConfigColumnsWithDefault    = []string{"mod_log", "last_case_id"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )
