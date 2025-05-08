@@ -17,6 +17,7 @@ var (
 	User   = &UserArg{}
 	Channel = &ChannelArg{}
 	Bet = &BetArg{}
+	Duration = &DurationArg{}
 	CoinSide = &CoinSideArg{}
 	UserBalance = &BalanceArg{}
 	ResponseType = &ResponseArg{}
@@ -56,6 +57,12 @@ type BetArg struct{}
 var _ ArgumentType = (*BetArg)(nil)
 func (b *BetArg) Help() string {
 	return "Whole integer|max|all"
+}
+
+type DurationArg struct{}
+var _ ArgumentType = (*DurationArg)(nil)
+func (d *DurationArg) Help() string {
+	return "Duration"
 }
 
 type CoinSideArg struct{}
