@@ -12,6 +12,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Guild functions
+func getGuild(guildID string) *discordgo.Guild {
+	guild, _ := common.Session.Guild(guildID)
+	return guild
+}
+
 // Message functions
 
 // SendBasicMessage sends a string as message content to the given channel
@@ -116,13 +122,13 @@ func GetUser(userID string) (*discordgo.User, error) {
 	return u, err
 }
 
-// GetUser returns the member object if possible of a user ID
-func GetMember(guildID string, userID string) (*discordgo.Member, error) {
+// GetMember returns the member object if possible of a user ID/ Mention
+func GetMember(guildID string, userStr string) (*discordgo.Member, error) {
 	// Direct mention
-	if strings.HasPrefix(userID, "<@") {
-		userID = userID[2 : len(userID)-1]
+	if strings.HasPrefix(userStr, "<@") {
+		userStr = userStr[2 : len(userStr)-1]
 	}
-	u, err := common.Session.GuildMember(guildID, userID)
+	u, err := common.Session.GuildMember(guildID, userStr)
 	return u, err
 }
 
@@ -135,7 +141,7 @@ func GetRole(guildID, roleStr string) (role *discordgo.Role, err error) {
 		return nil, err
 	}
 	// Role mention
-	if strings.HasPrefix(roleStr, "<@") {
+	if strings.HasPrefix(roleStr, "<@&") {
 		roleStr = roleStr[3 : len(roleStr)-1]
 	}
 	for i := range guild.Roles {
