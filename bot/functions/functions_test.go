@@ -2,6 +2,8 @@ package functions
 
 import (
 	"testing"
+
+	"github.com/bwmarrin/discordgo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,4 +49,70 @@ func TestToInt64(t *testing.T) {
 		t.Logf("Converted unsupported type []int{1,2,3} to int64 (expected 0): %d", i)
 		assert.Equal(t, int64(0), i, "Expected 0 for unsupported types like a slice")
 	})
+}
+
+
+func TestIsRoleHigher(t *testing.T) {
+	tests := []struct {
+		name     string
+		higher   *discordgo.Role
+		lower    *discordgo.Role
+		expected bool
+	}{
+		{
+			name: "Higher position",
+			higher: &discordgo.Role{
+				ID:       "1",
+				Position: 10,
+			},
+			lower: &discordgo.Role{
+				ID:       "2",
+				Position: 5,
+			},
+			expected: true,
+		},
+		{
+			name: "Lower position",
+			higher: &discordgo.Role{
+				ID:       "1",
+				Position: 5,
+			},
+			lower: &discordgo.Role{
+				ID:       "2",
+				Position: 10,
+			},
+			expected: false,
+		},
+		{
+			name: "Same position, lower ID",
+			higher: &discordgo.Role{
+				ID:       "1",
+				Position: 5,
+			},
+			lower: &discordgo.Role{
+				ID:       "2",
+				Position: 5,
+			},
+			expected: true, // Lower ID considered "higher"
+		},
+		{
+			name: "Same position, same ID",
+			higher: &discordgo.Role{
+				ID:       "1",
+				Position: 5,
+			},
+			lower: &discordgo.Role{
+				ID:       "1",
+				Position: 5,
+			},
+			expected: false, // Same role
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IsRoleHigher(tt.higher, tt.lower)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }
