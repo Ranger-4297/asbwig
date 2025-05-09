@@ -132,6 +132,29 @@ func GetMember(guildID string, userStr string) (*discordgo.Member, error) {
 	return u, err
 }
 
+// IsMemberHigher returns true is memberA has a higher highest role than memberB
+func IsMemberHigher(guildID string, memberA, memberB *discordgo.Member) bool {
+	guild := getGuild(guildID)
+	if memberA.User.ID == guild.OwnerID {
+		return true // MemberA is the Owner so automatically true
+	} else if memberB.User.ID == guild.OwnerID {
+		return false // MemberB is the Owner so automatically false
+	}
+
+	memAHighRole := HighestRole(guildID, memberA)
+	memBHighRole := HighestRole(guildID, memberB)
+
+	if memAHighRole == nil && memBHighRole == nil {
+		return false // Neither have roles
+	} else if memAHighRole != nil && memBHighRole == nil {
+		return true // member B has no roles, so automatically true
+	} else if memAHighRole == nil && memBHighRole != nil {
+		return false // member A has no roles, so automatically false
+	}
+
+	return IsRoleHigher(memAHighRole, memBHighRole)
+}
+
 // Role functions
 
 // GetRole returns the full guild role object for a role ID/mention
