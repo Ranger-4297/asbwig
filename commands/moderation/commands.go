@@ -23,7 +23,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
 		target, _ := functions.GetMember(data.GuildID, data.Args[0])
 		warnReason := strings.Join(data.Args[1:], " ")
-		err := logCase(data.GuildID, *author, *target, logWarn, data.ChannelID, warnReason)
+		err := logCase(data.GuildID, author, target, logWarn, data.ChannelID, warnReason)
 		if err != nil {
 			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 30*time.Second)
 			return

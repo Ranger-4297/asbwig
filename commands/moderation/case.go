@@ -88,7 +88,7 @@ func removeFailedCase(caseData models.ModerationCase) {
 
 // Log generation
 
-func logCase(guildID string, Author, Target discordgo.Member, action logAction, currentChannel, reason string) error {
+func logCase(guildID string, Author, Target *discordgo.Member, action logAction, currentChannel, reason string) error {
 	logChannel, err := getGuildModLogChannel(guildID)
 	if err != nil {
 		return err
