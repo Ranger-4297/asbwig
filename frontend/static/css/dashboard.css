@@ -90,6 +90,7 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 }
 .card .btn {
     background-color: var(--basePurple);
+    border-color: var(--accentGrey);
 }
 
 .card.warn .card-header {
