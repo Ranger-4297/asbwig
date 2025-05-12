@@ -73,6 +73,9 @@ func setupWebRoutes() *goji.Mux {
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix"), handleUpdatePrefix)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix/"), handleUpdatePrefix)
 
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel"), handleUpdateModlog)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel/"), handleUpdateModlog)
+	
 	return RootMultiplexer
 }
 
@@ -94,6 +97,6 @@ func runRootMultiplexer() {
 }
 
 func runWebServer(multiplexer *goji.Mux) {
-	logrus.Info("Webserver started on :8085")
-	http.ListenAndServe(":8085", multiplexer)
+	logrus.Info("Webserver started on :8086")
+	http.ListenAndServe(":8086", multiplexer)
 }
