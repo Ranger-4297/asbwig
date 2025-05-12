@@ -97,6 +97,6 @@ func runRootMultiplexer() {
 }
 
 func runWebServer(multiplexer *goji.Mux) {
-	logrus.Info("Webserver started on :8086")
-	http.ListenAndServe(":8086", multiplexer)
+	logrus.Info("Webserver started on :8085")
+	http.ListenAndServe(":8085", multiplexer)
 }
