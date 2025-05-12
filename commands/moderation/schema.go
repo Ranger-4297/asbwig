@@ -4,12 +4,12 @@ var GuildModerationSchema = []string{`
 CREATE TABLE IF NOT EXISTS moderation_config (
 	guild_id TEXT PRIMARY KEY,
 	mod_log TEXT,
-	requiredWarnRoles TEXT[],
-	requiredMuteRoles TEXT[],
-	requiredUnmuteRoles TEXT[],
-	requiredKickRoles TEXT[],
-	requiredBanRoles TEXT[],
-	requiredUnbanRoles TEXT[],
+	required_warn_roles TEXT[],
+	required_mute_roles TEXT[],
+	required_unmute_roles TEXT[],
+	required_kick_roles TEXT[],
+	required_ban_roles TEXT[],
+	required_unban_roles TEXT[],
 	last_case_id BIGINT DEFAULT 0 NOT NULL
 );
 `,`
