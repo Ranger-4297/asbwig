@@ -13,7 +13,8 @@ import (
 )
 
 // Guild functions
-func getGuild(guildID string) *discordgo.Guild {
+// GetGuild returns the full guild object for a guild
+func GetGuild(guildID string) *discordgo.Guild {
 	guild, _ := common.Session.Guild(guildID)
 	return guild
 }
@@ -134,7 +135,7 @@ func GetMember(guildID string, userStr string) (*discordgo.Member, error) {
 
 // IsMemberHigher returns true is memberA has a higher highest role than memberB
 func IsMemberHigher(guildID string, memberA, memberB *discordgo.Member) bool {
-	guild := getGuild(guildID)
+	guild := GetGuild(guildID)
 	if memberA.User.ID == guild.OwnerID {
 		return true // MemberA is the Owner so automatically true
 	} else if memberB.User.ID == guild.OwnerID {
@@ -235,7 +236,7 @@ func SetRoles(guildID, memberID string, roleIDs []string) error {
 // HighestRole returns the role object of a members highest role
 // Will return nil if no role is found
 func HighestRole(guildID string, member *discordgo.Member) (role *discordgo.Role) {
-	guild := getGuild(guildID)
+	guild := GetGuild(guildID)
 	for _, memberRoleID := range member.Roles {
 		for _, guildRole := range guild.Roles {
 			if memberRoleID != guildRole.ID {
