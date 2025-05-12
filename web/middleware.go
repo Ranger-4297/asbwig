@@ -1,19 +1,25 @@
 package web
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/bot/prefix"
+	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"goji.io/v3/pat"
 )
 
@@ -204,17 +210,34 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		return guildData
 	}
 	retrievedGuild, _ := common.Session.Guild(guildID)
+	channels, _ := common.Session.GuildChannels(guildID)
+	sort.SliceStable(channels, func(i, j int) bool {
+		return channels[i].Position < channels[j].Position
+	})
+	modlog := getGuildModLogChannel(guildID)
 	guildData = map[string]interface{}{
 		"ID": retrievedGuild.ID,
 		"Name": retrievedGuild.Name,
 		"Avatar": retrievedGuild.IconURL("1024"),
-		"Channels": retrievedGuild.Channels,
-		"Roles": retrievedGuild.Roles,
+		"Channels": channels,
+		"Modlog": modlog,
 	}
 	if guildData["Avatar"] == "" {
 		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
 	}
 	return guildData
+}
+
+func getGuildModLogChannel(guildID string) (string) {
+	var logChannel string
+	query := `SELECT mod_log FROM moderation_config WHERE guild_id=$1`
+
+	err := common.PQ.QueryRow(query, guildID).Scan(&logChannel)
+	if err != nil {
+		return ""
+	}
+
+	return logChannel
 }
 
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions
@@ -253,6 +276,7 @@ func validateGuild(inner http.Handler) http.Handler {
 
 // handleUpdatePrefix changes the guilds prefix in the database with the one provided from the dashboard
 func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	var data struct {
 		Prefix string `json:"prefix"`
 	}
@@ -264,4 +288,16 @@ func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
 	prefix.ChangeGuildPrefix(server, data.Prefix)
 
 	http.Redirect(w, r, "/dashboard/"+server+"/manage/core", http.StatusSeeOther)
+}
+
+func handleUpdateModlog(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var data struct {
+		Channel string `json:"channel"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+	server := pat.Param(r, "server") // Extract the server (guild) ID from the URL
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
+	config.ModLog = null.StringFrom(data.Channel)
+	config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
 }
