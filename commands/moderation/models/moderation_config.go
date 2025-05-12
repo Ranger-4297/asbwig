@@ -19,61 +19,126 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // ModerationConfig is an object representing the database table.
 type ModerationConfig struct {
-	GuildID    string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	ModLog     null.String `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
-	LastCaseID int64       `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
+	GuildID             string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	ModLog              null.String       `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
+	Requiredwarnroles   types.StringArray `boil:"requiredwarnroles" json:"requiredwarnroles,omitempty" toml:"requiredwarnroles" yaml:"requiredwarnroles,omitempty"`
+	Requiredmuteroles   types.StringArray `boil:"requiredmuteroles" json:"requiredmuteroles,omitempty" toml:"requiredmuteroles" yaml:"requiredmuteroles,omitempty"`
+	Requiredunmuteroles types.StringArray `boil:"requiredunmuteroles" json:"requiredunmuteroles,omitempty" toml:"requiredunmuteroles" yaml:"requiredunmuteroles,omitempty"`
+	Requiredkickroles   types.StringArray `boil:"requiredkickroles" json:"requiredkickroles,omitempty" toml:"requiredkickroles" yaml:"requiredkickroles,omitempty"`
+	Requiredbanroles    types.StringArray `boil:"requiredbanroles" json:"requiredbanroles,omitempty" toml:"requiredbanroles" yaml:"requiredbanroles,omitempty"`
+	Requiredunbanroles  types.StringArray `boil:"requiredunbanroles" json:"requiredunbanroles,omitempty" toml:"requiredunbanroles" yaml:"requiredunbanroles,omitempty"`
+	LastCaseID          int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationConfigColumns = struct {
-	GuildID    string
-	ModLog     string
-	LastCaseID string
+	GuildID             string
+	ModLog              string
+	Requiredwarnroles   string
+	Requiredmuteroles   string
+	Requiredunmuteroles string
+	Requiredkickroles   string
+	Requiredbanroles    string
+	Requiredunbanroles  string
+	LastCaseID          string
 }{
-	GuildID:    "guild_id",
-	ModLog:     "mod_log",
-	LastCaseID: "last_case_id",
+	GuildID:             "guild_id",
+	ModLog:              "mod_log",
+	Requiredwarnroles:   "requiredwarnroles",
+	Requiredmuteroles:   "requiredmuteroles",
+	Requiredunmuteroles: "requiredunmuteroles",
+	Requiredkickroles:   "requiredkickroles",
+	Requiredbanroles:    "requiredbanroles",
+	Requiredunbanroles:  "requiredunbanroles",
+	LastCaseID:          "last_case_id",
 }
 
 var ModerationConfigTableColumns = struct {
-	GuildID    string
-	ModLog     string
-	LastCaseID string
+	GuildID             string
+	ModLog              string
+	Requiredwarnroles   string
+	Requiredmuteroles   string
+	Requiredunmuteroles string
+	Requiredkickroles   string
+	Requiredbanroles    string
+	Requiredunbanroles  string
+	LastCaseID          string
 }{
-	GuildID:    "moderation_config.guild_id",
-	ModLog:     "moderation_config.mod_log",
-	LastCaseID: "moderation_config.last_case_id",
+	GuildID:             "moderation_config.guild_id",
+	ModLog:              "moderation_config.mod_log",
+	Requiredwarnroles:   "moderation_config.requiredwarnroles",
+	Requiredmuteroles:   "moderation_config.requiredmuteroles",
+	Requiredunmuteroles: "moderation_config.requiredunmuteroles",
+	Requiredkickroles:   "moderation_config.requiredkickroles",
+	Requiredbanroles:    "moderation_config.requiredbanroles",
+	Requiredunbanroles:  "moderation_config.requiredunbanroles",
+	LastCaseID:          "moderation_config.last_case_id",
 }
 
 // Generated where
 
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
+
 var ModerationConfigWhere = struct {
-	GuildID    whereHelperstring
-	ModLog     whereHelpernull_String
-	LastCaseID whereHelperint64
+	GuildID             whereHelperstring
+	ModLog              whereHelpernull_String
+	Requiredwarnroles   whereHelpertypes_StringArray
+	Requiredmuteroles   whereHelpertypes_StringArray
+	Requiredunmuteroles whereHelpertypes_StringArray
+	Requiredkickroles   whereHelpertypes_StringArray
+	Requiredbanroles    whereHelpertypes_StringArray
+	Requiredunbanroles  whereHelpertypes_StringArray
+	LastCaseID          whereHelperint64
 }{
-	GuildID:    whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
-	ModLog:     whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
-	LastCaseID: whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
+	GuildID:             whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
+	ModLog:              whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
+	Requiredwarnroles:   whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredwarnroles\""},
+	Requiredmuteroles:   whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredmuteroles\""},
+	Requiredunmuteroles: whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredunmuteroles\""},
+	Requiredkickroles:   whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredkickroles\""},
+	Requiredbanroles:    whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredbanroles\""},
+	Requiredunbanroles:  whereHelpertypes_StringArray{field: "\"moderation_config\".\"requiredunbanroles\""},
+	LastCaseID:          whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
 }
 
 // ModerationConfigRels is where relationship names are stored.
 var ModerationConfigRels = struct {
-	GuildModerationCases string
-}{
-	GuildModerationCases: "GuildModerationCases",
-}
+}{}
 
 // moderationConfigR is where relationships are stored.
 type moderationConfigR struct {
-	GuildModerationCases ModerationCaseSlice `boil:"GuildModerationCases" json:"GuildModerationCases" toml:"GuildModerationCases" yaml:"GuildModerationCases"`
 }
 
 // NewStruct creates a new relationship struct
@@ -81,20 +146,13 @@ func (*moderationConfigR) NewStruct() *moderationConfigR {
 	return &moderationConfigR{}
 }
 
-func (r *moderationConfigR) GetGuildModerationCases() ModerationCaseSlice {
-	if r == nil {
-		return nil
-	}
-	return r.GuildModerationCases
-}
-
 // moderationConfigL is where Load methods for each relationship are stored.
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "mod_log", "last_case_id"}
+	moderationConfigAllColumns            = []string{"guild_id", "mod_log", "requiredwarnroles", "requiredmuteroles", "requiredunmuteroles", "requiredkickroles", "requiredbanroles", "requiredunbanroles", "last_case_id"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"mod_log", "last_case_id"}
+	moderationConfigColumnsWithDefault    = []string{"mod_log", "requiredwarnroles", "requiredmuteroles", "requiredunmuteroles", "requiredkickroles", "requiredbanroles", "requiredunbanroles", "last_case_id"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )
@@ -208,188 +266,6 @@ func (q moderationConfigQuery) Exists(ctx context.Context, exec boil.ContextExec
 	}
 
 	return count > 0, nil
-}
-
-// GuildModerationCases retrieves all the moderation_case's ModerationCases with an executor via guild_id column.
-func (o *ModerationConfig) GuildModerationCases(mods ...qm.QueryMod) moderationCaseQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"moderation_cases\".\"guild_id\"=?", o.GuildID),
-	)
-
-	return ModerationCases(queryMods...)
-}
-
-// LoadGuildModerationCases allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (moderationConfigL) LoadGuildModerationCases(ctx context.Context, e boil.ContextExecutor, singular bool, maybeModerationConfig interface{}, mods queries.Applicator) error {
-	var slice []*ModerationConfig
-	var object *ModerationConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeModerationConfig.(*ModerationConfig)
-		if !ok {
-			object = new(ModerationConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeModerationConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeModerationConfig))
-			}
-		}
-	} else {
-		s, ok := maybeModerationConfig.(*[]*ModerationConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeModerationConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeModerationConfig))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &moderationConfigR{}
-		}
-		args[object.GuildID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &moderationConfigR{}
-			}
-			args[obj.GuildID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`moderation_cases`),
-		qm.WhereIn(`moderation_cases.guild_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load moderation_cases")
-	}
-
-	var resultSlice []*ModerationCase
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice moderation_cases")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on moderation_cases")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for moderation_cases")
-	}
-
-	if singular {
-		object.R.GuildModerationCases = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &moderationCaseR{}
-			}
-			foreign.R.Guild = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.GuildID == foreign.GuildID {
-				local.R.GuildModerationCases = append(local.R.GuildModerationCases, foreign)
-				if foreign.R == nil {
-					foreign.R = &moderationCaseR{}
-				}
-				foreign.R.Guild = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// AddGuildModerationCasesG adds the given related objects to the existing relationships
-// of the moderation_config, optionally inserting them as new records.
-// Appends related to o.R.GuildModerationCases.
-// Sets related.R.Guild appropriately.
-// Uses the global database handle.
-func (o *ModerationConfig) AddGuildModerationCasesG(ctx context.Context, insert bool, related ...*ModerationCase) error {
-	return o.AddGuildModerationCases(ctx, boil.GetContextDB(), insert, related...)
-}
-
-// AddGuildModerationCases adds the given related objects to the existing relationships
-// of the moderation_config, optionally inserting them as new records.
-// Appends related to o.R.GuildModerationCases.
-// Sets related.R.Guild appropriately.
-func (o *ModerationConfig) AddGuildModerationCases(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ModerationCase) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.GuildID = o.GuildID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"moderation_cases\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
-				strmangle.WhereClause("\"", "\"", 2, moderationCasePrimaryKeyColumns),
-			)
-			values := []interface{}{o.GuildID, rel.GuildID, rel.CaseID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.GuildID = o.GuildID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &moderationConfigR{
-			GuildModerationCases: related,
-		}
-	} else {
-		o.R.GuildModerationCases = append(o.R.GuildModerationCases, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &moderationCaseR{
-				Guild: o,
-			}
-		} else {
-			rel.R.Guild = o
-		}
-	}
-	return nil
 }
 
 // ModerationConfigs retrieves all the records using an executor.

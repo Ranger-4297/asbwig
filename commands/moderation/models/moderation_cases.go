@@ -204,26 +204,15 @@ var ModerationCaseWhere = struct {
 
 // ModerationCaseRels is where relationship names are stored.
 var ModerationCaseRels = struct {
-	Guild string
-}{
-	Guild: "Guild",
-}
+}{}
 
 // moderationCaseR is where relationships are stored.
 type moderationCaseR struct {
-	Guild *ModerationConfig `boil:"Guild" json:"Guild" toml:"Guild" yaml:"Guild"`
 }
 
 // NewStruct creates a new relationship struct
 func (*moderationCaseR) NewStruct() *moderationCaseR {
 	return &moderationCaseR{}
-}
-
-func (r *moderationCaseR) GetGuild() *ModerationConfig {
-	if r == nil {
-		return nil
-	}
-	return r.Guild
 }
 
 // moderationCaseL is where Load methods for each relationship are stored.
@@ -346,184 +335,6 @@ func (q moderationCaseQuery) Exists(ctx context.Context, exec boil.ContextExecut
 	}
 
 	return count > 0, nil
-}
-
-// Guild pointed to by the foreign key.
-func (o *ModerationCase) Guild(mods ...qm.QueryMod) moderationConfigQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"guild_id\" = ?", o.GuildID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return ModerationConfigs(queryMods...)
-}
-
-// LoadGuild allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (moderationCaseL) LoadGuild(ctx context.Context, e boil.ContextExecutor, singular bool, maybeModerationCase interface{}, mods queries.Applicator) error {
-	var slice []*ModerationCase
-	var object *ModerationCase
-
-	if singular {
-		var ok bool
-		object, ok = maybeModerationCase.(*ModerationCase)
-		if !ok {
-			object = new(ModerationCase)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeModerationCase)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeModerationCase))
-			}
-		}
-	} else {
-		s, ok := maybeModerationCase.(*[]*ModerationCase)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeModerationCase)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeModerationCase))
-			}
-		}
-	}
-
-	args := make(map[interface{}]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &moderationCaseR{}
-		}
-		args[object.GuildID] = struct{}{}
-
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &moderationCaseR{}
-			}
-
-			args[obj.GuildID] = struct{}{}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]interface{}, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`moderation_config`),
-		qm.WhereIn(`moderation_config.guild_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load ModerationConfig")
-	}
-
-	var resultSlice []*ModerationConfig
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice ModerationConfig")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for moderation_config")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for moderation_config")
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Guild = foreign
-		if foreign.R == nil {
-			foreign.R = &moderationConfigR{}
-		}
-		foreign.R.GuildModerationCases = append(foreign.R.GuildModerationCases, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.GuildID == foreign.GuildID {
-				local.R.Guild = foreign
-				if foreign.R == nil {
-					foreign.R = &moderationConfigR{}
-				}
-				foreign.R.GuildModerationCases = append(foreign.R.GuildModerationCases, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// SetGuildG of the moderationCase to the related item.
-// Sets o.R.Guild to related.
-// Adds o to related.R.GuildModerationCases.
-// Uses the global database handle.
-func (o *ModerationCase) SetGuildG(ctx context.Context, insert bool, related *ModerationConfig) error {
-	return o.SetGuild(ctx, boil.GetContextDB(), insert, related)
-}
-
-// SetGuild of the moderationCase to the related item.
-// Sets o.R.Guild to related.
-// Adds o to related.R.GuildModerationCases.
-func (o *ModerationCase) SetGuild(ctx context.Context, exec boil.ContextExecutor, insert bool, related *ModerationConfig) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"moderation_cases\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
-		strmangle.WhereClause("\"", "\"", 2, moderationCasePrimaryKeyColumns),
-	)
-	values := []interface{}{related.GuildID, o.GuildID, o.CaseID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.GuildID = related.GuildID
-	if o.R == nil {
-		o.R = &moderationCaseR{
-			Guild: related,
-		}
-	} else {
-		o.R.Guild = related
-	}
-
-	if related.R == nil {
-		related.R = &moderationConfigR{
-			GuildModerationCases: ModerationCaseSlice{o},
-		}
-	} else {
-		related.R.GuildModerationCases = append(related.R.GuildModerationCases, o)
-	}
-
-	return nil
 }
 
 // ModerationCases retrieves all the records using an executor.
