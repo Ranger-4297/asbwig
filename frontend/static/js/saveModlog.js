@@ -22,23 +22,3 @@ document.getElementById('saveModlogButton').addEventListener('click', function()
 		}, 300);
 	}, 3000);
 });
-document.addEventListener('DOMContentLoaded', function () {
-	const channelItems = document.querySelectorAll('.channelListItem');
-	const modLogLabel = document.getElementById('modlogDropdownLabel');
-	const modlogHiddenInput = document.getElementById('modlogInput');
-	channelItems.forEach(item => {
-		item.addEventListener('click', function (e) {
-			e.preventDefault();
-			const value = this.getAttribute('data-value');
-			const text = this.textContent;
-			modLogLabel.textContent = text;
-			modlogHiddenInput.value = value;
-		});
-	});
-	var modlogID = "{{.CurrentGuild.Modlog}}"; 
-	var selectedItem = document.querySelector(`a[data-value="${modlogID}"]`);
-	if (selectedItem) {
-		document.getElementById("modlogDropdownLabel").textContent = selectedItem.textContent;
-		selectedItem.classList.add('selected');
-	}
-});
