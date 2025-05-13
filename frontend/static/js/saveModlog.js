@@ -11,14 +11,14 @@ document.getElementById('saveModlogButton').addEventListener('click', function()
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({ channel: input })
-	})
-	.catch((error) => {
-		console.error('Error:', error);
-	});
-	setTimeout(function() {
-		document.getElementById('successAlert').style.opacity = 0;
-		setTimeout(function() {
-			document.getElementById('successAlert').style.display = 'none';
-		}, 300);
-	}, 3000);
+	}).then(() => {
+		const alert = document.getElementById('successAlert');
+		if (alert) {
+			alert.style.display = 'block';
+			alert.style.opacity = 1;
+			setTimeout(() => {
+				location.reload();
+			}, 1500);
+		}
+	}).catch(console.error);
 });
