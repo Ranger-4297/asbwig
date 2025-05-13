@@ -52,30 +52,95 @@
 					</div>
 				</div>
 			</div>
-		</div>
-	</main>
-</body>
-<script src="{{.URL}}/static/js/saveModlog.js"></script>
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-	const channelItems = document.querySelectorAll('.channelListItem');
-	const modLogLabel = document.getElementById('modlogDropdownLabel');
-	const modlogHiddenInput = document.getElementById('modlogInput');
-	channelItems.forEach(item => {
-		item.addEventListener('click', function (e) {
-			e.preventDefault();
-			const value = this.getAttribute('data-value');
-			const text = this.textContent;
-			modLogLabel.textContent = text;
-			modlogHiddenInput.value = value;
+			<h2 style="margin-top: 2px">Command requirements</h2>
+			<div class="container-fluid my-4 px-0">
+				<div class="row">
+					{{$moderationAction := dict 1 "Warn" 2 "Mute" 3 "Unmute" 4 "Kick" 5 "Ban" 6 "Unban"}}
+					{{range (seq 1 6)}}
+					<div class="col-md-4 mb-4">
+						<div class="card {{index $moderationAction .}}">
+							<h5 class="card-header">{{- index $moderationAction . -}}s</h5>
+							<div class="card-body">
+								<p class="card-text">Required moderator roles</p>
+								<div class="input-group mb-3">
+									<button class="btn dropdown-toggle text-start flex-grow-1 text-white requiredRolesDropdown" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
+										<span id="requiredRolesLabel">Select roles</span>
+									</button>
+									<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;" aria-labelledby="requiredRolesDropdown">
+										{{range $.CurrentGuild.Roles}}
+										{{if or (eq .ID $.CurrentGuild.ID) .Managed}}
+										{{continue}}
+										{{end}}
+										<li>
+											<label class="dropdown-item">
+												<input type="checkbox" class="roleCheckbox me-2" value="{{.ID}}">
+												{{.Name}}
+											</label>
+										</li>
+										{{end}}
+									</ul>
+									<input type="hidden" name="requiredRoles" id="requiredRoles{{index $moderationAction .}}Input">
+									<button type="submit" class="btn text-light saveRolesButton" data-action="{{index $moderationAction .}}" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					{{end}}
+				</div>
+			</div>
+			<div class="px-0">
+				<button type="submit" class="btn text-light saveRolesButton w-100" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">
+					Save all
+				</button>
+			</div>
+		</main>
+	</body>
+	<script src="{{.URL}}/static/js/saveModlog.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const channelItems = document.querySelectorAll('.channelListItem');
+			const modLogLabel = document.getElementById('modlogDropdownLabel');
+			const modlogHiddenInput = document.getElementById('modlogInput');
+			channelItems.forEach(item => {
+				item.addEventListener('click', function (e) {
+					e.preventDefault();
+					const value = this.getAttribute('data-value');
+					const text = this.textContent;
+					modLogLabel.textContent = text;
+					modlogHiddenInput.value = value;
+				});
+			});
+			var modlogID = "{{.CurrentGuild.Modlog}}"; 
+			var selectedItem = document.querySelector(`a[data-value="${modlogID}"]`);
+			if (selectedItem) {
+				document.getElementById("modlogDropdownLabel").textContent = selectedItem.textContent;
+				selectedItem.classList.add('selected');
+			}
 		});
-	});
-	var modlogID = "{{.CurrentGuild.Modlog}}"; 
-	var selectedItem = document.querySelector(`a[data-value="${modlogID}"]`);
-	if (selectedItem) {
-		document.getElementById("modlogDropdownLabel").textContent = selectedItem.textContent;
-		selectedItem.classList.add('selected');
-	}
-});
-</script>
+	</script>
+	<script src="{{.URL}}/static/js/saveRoles.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			document.querySelectorAll('.roleCheckbox').forEach(roleCheckbox => {
+				roleCheckbox.addEventListener('change', function () {
+					const container = roleCheckbox.closest('.input-group');
+					const selected = Array.from(container.querySelectorAll('.roleCheckbox:checked'))
+					.map(cb => cb.parentElement.textContent.trim());
+					const selectedIDs = Array.from(container.querySelectorAll('.roleCheckbox:checked'))
+					.map(cb => cb.value);
+					
+					const label = container.querySelector('#requiredRolesLabel');
+					const hiddenInput = container.querySelector('input[type="hidden"]');
+					
+					label.textContent = selected.length > 0 ? selected.join(', ') : 'Select roles';
+					hiddenInput.value = JSON.stringify(selectedIDs);
+				});
+			});
+			document.querySelectorAll('.requiredRolesDropdown + .dropdown-menu').forEach(menu => {
+				menu.addEventListener('click', function (e) {
+					e.stopPropagation();
+				});
+			});
+		});
+	</script>
 </html>
