@@ -26,6 +26,7 @@ import (
 // ModerationConfig is an object representing the database table.
 type ModerationConfig struct {
 	GuildID             string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	Enabled             bool              `boil:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
 	ModLog              null.String       `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
 	RequiredWarnRoles   types.StringArray `boil:"required_warn_roles" json:"required_warn_roles,omitempty" toml:"required_warn_roles" yaml:"required_warn_roles,omitempty"`
 	RequiredMuteRoles   types.StringArray `boil:"required_mute_roles" json:"required_mute_roles,omitempty" toml:"required_mute_roles" yaml:"required_mute_roles,omitempty"`
@@ -41,6 +42,7 @@ type ModerationConfig struct {
 
 var ModerationConfigColumns = struct {
 	GuildID             string
+	Enabled             string
 	ModLog              string
 	RequiredWarnRoles   string
 	RequiredMuteRoles   string
@@ -51,6 +53,7 @@ var ModerationConfigColumns = struct {
 	LastCaseID          string
 }{
 	GuildID:             "guild_id",
+	Enabled:             "enabled",
 	ModLog:              "mod_log",
 	RequiredWarnRoles:   "required_warn_roles",
 	RequiredMuteRoles:   "required_mute_roles",
@@ -63,6 +66,7 @@ var ModerationConfigColumns = struct {
 
 var ModerationConfigTableColumns = struct {
 	GuildID             string
+	Enabled             string
 	ModLog              string
 	RequiredWarnRoles   string
 	RequiredMuteRoles   string
@@ -73,6 +77,7 @@ var ModerationConfigTableColumns = struct {
 	LastCaseID          string
 }{
 	GuildID:             "moderation_config.guild_id",
+	Enabled:             "moderation_config.enabled",
 	ModLog:              "moderation_config.mod_log",
 	RequiredWarnRoles:   "moderation_config.required_warn_roles",
 	RequiredMuteRoles:   "moderation_config.required_mute_roles",
@@ -84,6 +89,15 @@ var ModerationConfigTableColumns = struct {
 }
 
 // Generated where
+
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelpertypes_StringArray struct{ field string }
 
@@ -113,6 +127,7 @@ func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
 
 var ModerationConfigWhere = struct {
 	GuildID             whereHelperstring
+	Enabled             whereHelperbool
 	ModLog              whereHelpernull_String
 	RequiredWarnRoles   whereHelpertypes_StringArray
 	RequiredMuteRoles   whereHelpertypes_StringArray
@@ -123,6 +138,7 @@ var ModerationConfigWhere = struct {
 	LastCaseID          whereHelperint64
 }{
 	GuildID:             whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
+	Enabled:             whereHelperbool{field: "\"moderation_config\".\"enabled\""},
 	ModLog:              whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
 	RequiredWarnRoles:   whereHelpertypes_StringArray{field: "\"moderation_config\".\"required_warn_roles\""},
 	RequiredMuteRoles:   whereHelpertypes_StringArray{field: "\"moderation_config\".\"required_mute_roles\""},
@@ -150,9 +166,9 @@ func (*moderationConfigR) NewStruct() *moderationConfigR {
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles", "last_case_id"}
+	moderationConfigAllColumns            = []string{"guild_id", "enabled", "mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles", "last_case_id"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles", "last_case_id"}
+	moderationConfigColumnsWithDefault    = []string{"enabled", "mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles", "last_case_id"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )

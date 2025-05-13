@@ -3,6 +3,7 @@ package moderation
 var GuildModerationSchema = []string{`
 CREATE TABLE IF NOT EXISTS moderation_config (
 	guild_id TEXT PRIMARY KEY,
+	enabled BOOL DEFAULT FALSE NOT NULL,
 	mod_log TEXT,
 	required_warn_roles TEXT[],
 	required_mute_roles TEXT[],
