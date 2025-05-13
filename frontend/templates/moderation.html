@@ -22,9 +22,18 @@
 	<div class="alert alert-success" role="alert" id="successAlert" style="display: none;">
 		saved successfully!
 	</div>
-	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
+	<main class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="m-4 w-100">
-			<h2 style="margin-top: 2px">Moderation config</h2>
+			<div class="d-flex align-items-center" style="margin-top: 2px; margin-bottom: 0;">
+				<div class="form-check form-switch" style="min-height: unset;">
+					<label class="switch">
+						<input type="checkbox" id="toggleModeration" {{if .CurrentGuild.ModerationEnabled}}checked{{end}}>
+						<span class="slider"></span>
+						<span class="knob"></span>
+					</label>
+				</div>
+				<h2>Moderation</h2>
+			</div>
 			<div class="container-fluid my-4 px-0">
 				<div class="row row-cols-1 row-cols-md-3 g-4">
 					<div class="col">
