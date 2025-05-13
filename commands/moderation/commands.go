@@ -16,15 +16,17 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
+// returns a boolean value on the status of the guild moderation
 func isEnabled(guildID string) bool {
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
 	return config.Enabled
 }
 
-func requireRoles(guildID, roleRequirements string) types.StringArray {
+// returns an array of required roles to run the selected command
+func requireRoles(guildID, command string) types.StringArray {
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
 	var requiredRoles types.StringArray
-	switch roleRequirements{
+	switch command{
 	case "warn":
 		requiredRoles = config.RequiredWarnRoles
 	case "mute":
@@ -41,6 +43,7 @@ func requireRoles(guildID, roleRequirements string) types.StringArray {
 	return requiredRoles
 }
 
+// returns a boolean on whether the user has the current permissions to run the selected command
 func hasCommandPermissions(guildID string, user *discordgo.Member, requireType string) bool {
 	requiredRoles := requireRoles(guildID, requireType)
 	for _, role := range user.Roles {
