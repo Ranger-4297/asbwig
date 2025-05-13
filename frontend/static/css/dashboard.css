@@ -23,6 +23,7 @@
 html, body {
 	height: 100%;
 	margin: 0;
+	overflow-x: hidden;
 }
 body {
 	background-color: var(--basePurple)!important;
@@ -93,45 +94,45 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 	border-color: var(--accentGrey);
 }
 
-.card.warn .card-header {
+.card.Warn .card-header {
 	border-bottom-color: var(--logWarn);
 }
-.card.warn .btn {
+.card.Warn .btn {
 	background-color: var(--logWarn);
 }
 
-.card.mute .card-header {
+.card.Mute .card-header {
 	border-bottom-color: var(--logMute);
 }
-.card.mute .btn {
+.card.Mute .btn {
 	background-color: var(--logMute);
 }
 
-.card.unmute .card-header {
+.card.Unmute .card-header {
 	border-bottom-color: var(--logUnmute);
 }
-.card.unmute .btn {
+.card.Unmute .btn {
 	background-color: var(--logUnmute);
 }
 
-.card.kick .card-header {
+.card.Kick .card-header {
 	border-bottom-color: var(--logKick);
 }
-.card.kick .btn {
+.card.Kick .btn {
 	background-color: var(--logKick);
 }
 
-.card.ban .card-header {
+.card.Ban .card-header {
 	border-bottom-color: var(--logBan);
 }
-.card.ban .btn {
+.card.Ban .btn {
 	background-color: var(--logBan);
 }
 
-.card.unban .card-header {
+.card.Unban .card-header {
 	border-bottom-color: var(--logUnban);
 }
-.card.unban .btn {
+.card.Unban .btn {
 	background-color: var(--logUnban);
 }
 
