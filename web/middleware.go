@@ -220,6 +220,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		return roles[i].Position > roles[j].Position
 	})
 	modlog := getGuildModLogChannel(guildID)
+	status := getModerationStatus(guildID)
 	guildData = map[string]interface{}{
 		"ID": retrievedGuild.ID,
 		"Name": retrievedGuild.Name,
@@ -228,6 +229,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		"Roles": roles,
 		"CommandRestrictions": restrictions,
 		"Modlog": modlog,
+		"ModerationEnabled": status,
 	}
 	if guildData["Avatar"] == "" {
 		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
@@ -235,7 +237,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 	return guildData
 }
 
-func getGuildModLogChannel(guildID string) (string) {
+func getGuildModLogChannel(guildID string) string {
 	var logChannel string
 	query := `SELECT mod_log FROM moderation_config WHERE guild_id=$1`
 
@@ -245,6 +247,18 @@ func getGuildModLogChannel(guildID string) (string) {
 	}
 
 	return logChannel
+}
+
+func getModerationStatus(guildID string) bool {
+	var status bool = false
+	query := `SELECT enabled FROM moderation_config WHERE guild_id=$1`
+	
+	err := common.PQ.QueryRow(query, guildID).Scan(&status)
+	if err != nil {
+		return false
+	}
+
+	return status
 }
 
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions
@@ -302,6 +316,7 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
         Modlog string `json:"modlog"`
         Roles map[string][]string `json:"roles"`
         Update string `json:"update"`
+		Enabled bool `json:"enabled"`
     }
     json.NewDecoder(r.Body).Decode(&data)
     server := pat.Param(r, "server")
@@ -338,6 +353,9 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
             config.RequiredUnbanRoles = actionRoles
         }
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
+	case "status":
+		config.Enabled = data.Enabled
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("enabled"), boil.Infer())
     }
 
     w.WriteHeader(http.StatusOK)
