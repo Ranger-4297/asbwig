@@ -143,4 +143,40 @@
 			});
 		});
 	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const commandRestrictions = {
+				Warn: {{toJson .CurrentGuild.CommandRestrictions.Warn}},
+				Mute: {{toJson .CurrentGuild.CommandRestrictions.Mute}},
+				Unmute: {{toJson .CurrentGuild.CommandRestrictions.Unmute}},
+				Kick: {{toJson .CurrentGuild.CommandRestrictions.Kick}},
+				Ban: {{toJson .CurrentGuild.CommandRestrictions.Ban}},
+				Unban: {{toJson .CurrentGuild.CommandRestrictions.Unban}}
+			};
+			
+			for (const [action, roleIDs] of Object.entries(commandRestrictions)) {
+				if (!Array.isArray(roleIDs)) continue;
+				
+				// Find the correct input group by data-action attribute
+				const inputGroup = document.querySelector(`.saveRolesButton[data-action="${action}"]`)?.closest('.input-group');
+				if (!inputGroup) continue;
+				
+				const label = inputGroup.querySelector('#requiredRolesLabel');
+				const hiddenInput = inputGroup.querySelector('input[type="hidden"]');
+				const checkboxes = inputGroup.querySelectorAll('.roleCheckbox');
+				
+				let selectedNames = [];
+				
+				checkboxes.forEach(cb => {
+					if (roleIDs.includes(cb.value)) {
+						cb.checked = true;
+						selectedNames.push(cb.parentElement.textContent.trim());
+					}
+				});
+				
+				if (label) label.textContent = selectedNames.length > 0 ? selectedNames.join(', ') : 'Select roles';
+				if (hiddenInput) hiddenInput.value = JSON.stringify(roleIDs);
+			}
+		});
+	</script>
 </html>
