@@ -45,7 +45,7 @@
 										{{end}}
 									</ul>
 									<input type="hidden" name="modlogChannel" id="modlogInput">
-									<button type="submit" id="saveModlogButton" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
+									<button type="submit" data-action="modlog" id="saveModlogButton" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
 							</div>
 						</div>
@@ -89,13 +89,13 @@
 				</div>
 			</div>
 			<div class="px-0">
-				<button type="submit" class="btn text-light saveRolesButton w-100" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">
+				<button type="submit" id="saveAllButton" class="btn text-light saveAllButton w-100" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">
 					Save all
 				</button>
 			</div>
 		</main>
 	</body>
-	<script src="{{.URL}}/static/js/saveModlog.js"></script>
+	<script src="{{.URL}}/static/js/saveAllModeration.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const channelItems = document.querySelectorAll('.channelListItem');
@@ -118,7 +118,6 @@
 			}
 		});
 	</script>
-	<script src="{{.URL}}/static/js/saveRoles.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {
 			document.querySelectorAll('.roleCheckbox').forEach(roleCheckbox => {
