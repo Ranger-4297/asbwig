@@ -15,13 +15,15 @@ function submitModerationUpdate({ modlog = null, roles = null, enabled = null, u
 		},
 		body: JSON.stringify(body)
 	}).then(() => {
-		const alert = document.getElementById('successAlert');
-		if (alert) {
-			alert.style.display = 'block';
-			alert.style.opacity = 1;
-			setTimeout(() => {
-				location.reload();
-			}, 1500);
+		if (enabled == null) {
+			const alert = document.getElementById('successAlert');
+			if (alert) {
+				alert.style.display = 'block';
+				alert.style.opacity = 1;
+				setTimeout(() => {
+					location.reload();
+				}, 1500);
+			}
 		}
 	}).catch(console.error);
 }
@@ -75,14 +77,14 @@ document.querySelectorAll('.saveRolesButton').forEach(button => {
 	});
 });
 
-// Toggle moderation
+// Save moderation status
 document.addEventListener('DOMContentLoaded', () => {
-	const moderationToggle = document.getElementById('switchCheckReverse');
-	
+	const moderationToggle = document.getElementById('toggleModeration');
+
 	if (moderationToggle) {
 		moderationToggle.addEventListener('change', () => {
 			const isEnabled = moderationToggle.checked;
-			
+
 			submitModerationUpdate({
 				enabled: isEnabled,
 				update: "status"
