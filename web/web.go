@@ -32,7 +32,14 @@ func embedHTML(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data := dashboardContextData(w, r)
 
-		tmpl, err := template.ParseFS(frontend.HTMLTemplates, "templates/*.html")
+		funcMap := template.FuncMap{
+			"seq": seq,
+			"dict": dict,
+			"inSlice": inSlice,
+			"toJson": toJson,
+		}
+
+		tmpl, err := template.New("template").Funcs(funcMap).ParseFS(frontend.HTMLTemplates, "templates/*.html")
 		if err != nil {
 			http.Error(w, "Failed to parse templates", http.StatusInternalServerError)
 			return
@@ -76,6 +83,8 @@ func setupWebRoutes() *goji.Mux {
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel"), handleUpdateModlog)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel/"), handleUpdateModlog)
 	
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-roles"), handleUpdateModerationRoles)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-roles/"), handleUpdateModerationRoles)
 	return RootMultiplexer
 }
 

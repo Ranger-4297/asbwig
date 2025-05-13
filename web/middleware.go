@@ -211,8 +211,13 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 	}
 	retrievedGuild, _ := common.Session.Guild(guildID)
 	channels, _ := common.Session.GuildChannels(guildID)
+	roles := retrievedGuild.Roles
+	restrictions := getGuildModerationRestrictions(guildID)
 	sort.SliceStable(channels, func(i, j int) bool {
 		return channels[i].Position < channels[j].Position
+	})
+	sort.SliceStable(roles, func(i, j int) bool {
+		return roles[i].Position > roles[j].Position
 	})
 	modlog := getGuildModLogChannel(guildID)
 	guildData = map[string]interface{}{
@@ -220,6 +225,8 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		"Name": retrievedGuild.Name,
 		"Avatar": retrievedGuild.IconURL("1024"),
 		"Channels": channels,
+		"Roles": roles,
+		"CommandRestrictions": restrictions,
 		"Modlog": modlog,
 	}
 	if guildData["Avatar"] == "" {
@@ -269,7 +276,6 @@ func validateGuild(inner http.Handler) http.Handler {
             return
         }
 
-        // Call the next handler with the updated context
         inner.ServeHTTP(w, r)
     })
 }
@@ -283,7 +289,7 @@ func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
 	
 	json.NewDecoder(r.Body).Decode(&data)
 
-	server := pat.Param(r, "server") // Extract the server (guild) ID from the URL
+	server := pat.Param(r, "server")
 
 	prefix.ChangeGuildPrefix(server, data.Prefix)
 
@@ -296,8 +302,57 @@ func handleUpdateModlog(w http.ResponseWriter, r *http.Request) {
 		Channel string `json:"channel"`
 	}
 	json.NewDecoder(r.Body).Decode(&data)
-	server := pat.Param(r, "server") // Extract the server (guild) ID from the URL
+	server := pat.Param(r, "server")
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
 	config.ModLog = null.StringFrom(data.Channel)
 	config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+
+func handleUpdateModerationRoles(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var data struct {
+		Roles []string `json:"roles"`
+		Action string `json:"action"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+	server := pat.Param(r, "server")
+
+	whitelist := "required_" + strings.ToLower(data.Action) +"_roles"
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
+	switch data.Action{
+	case "Warn":
+		config.RequiredWarnRoles = data.Roles
+	case "Mute":
+		config.RequiredMuteRoles = data.Roles
+	case "Unmute":
+		config.RequiredUnmuteRoles = data.Roles
+	case "Kick":
+		config.RequiredKickRoles = data.Roles
+	case "Ban":
+		config.RequiredBanRoles = data.Roles
+	case "Unban":
+		config.RequiredUnbanRoles = data.Roles
+	}
+
+	config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+
+func getGuildModerationRestrictions(guildID string) map[string]interface{} {
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	commandRestrictions := map[string]interface{}{
+		"Warn": config.RequiredWarnRoles,
+		"Mute": config.RequiredMuteRoles,
+		"Unmute": config.RequiredUnmuteRoles,
+		"Kick": config.RequiredKickRoles,
+		"Ban": config.RequiredBanRoles,
+		"Unban": config.RequiredUnbanRoles,
+	}
+	return commandRestrictions
 }
