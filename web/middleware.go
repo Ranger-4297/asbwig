@@ -296,52 +296,52 @@ func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard/"+server+"/manage/core", http.StatusSeeOther)
 }
 
-func handleUpdateModlog(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	var data struct {
-		Channel string `json:"channel"`
-	}
-	json.NewDecoder(r.Body).Decode(&data)
-	server := pat.Param(r, "server")
-	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
-	config.ModLog = null.StringFrom(data.Channel)
-	config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
+    defer r.Body.Close()
+    var data struct {
+        Modlog string `json:"modlog"`
+        Roles map[string][]string `json:"roles"`
+        Update string `json:"update"`
+    }
+    json.NewDecoder(r.Body).Decode(&data)
+    server := pat.Param(r, "server")
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
-}
+    config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
+    switch data.Update {
+    case "all":
+		config.ModLog = null.StringFrom(data.Modlog)
+		config.RequiredWarnRoles = data.Roles["Warn"]
+		config.RequiredMuteRoles = data.Roles["Mute"]
+		config.RequiredUnmuteRoles = data.Roles["Unmute"]
+		config.RequiredKickRoles = data.Roles["Kick"]
+		config.RequiredBanRoles = data.Roles["Ban"]
+		config.RequiredUnbanRoles = data.Roles["Unban"]
+        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles"), boil.Infer())
+    case "modlog":
+        config.ModLog = null.StringFrom(data.Modlog)
+        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+    case "Warn", "Mute", "Unmute", "Kick", "Ban", "Unban":
+		whitelist := "required_" + strings.ToLower(data.Update) +"_roles"
+		actionRoles := data.Roles[data.Update]
+		switch data.Update {
+        case "Warn":
+            config.RequiredWarnRoles = actionRoles
+        case "Mute":
+            config.RequiredMuteRoles = actionRoles
+        case "Unmute":
+            config.RequiredUnmuteRoles = actionRoles
+        case "Kick":
+            config.RequiredKickRoles = actionRoles
+        case "Ban":
+            config.RequiredBanRoles = actionRoles
+        case "Unban":
+            config.RequiredUnbanRoles = actionRoles
+        }
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
+    }
 
-func handleUpdateModerationRoles(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	var data struct {
-		Roles []string `json:"roles"`
-		Action string `json:"action"`
-	}
-	json.NewDecoder(r.Body).Decode(&data)
-	server := pat.Param(r, "server")
-
-	whitelist := "required_" + strings.ToLower(data.Action) +"_roles"
-	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
-	switch data.Action{
-	case "Warn":
-		config.RequiredWarnRoles = data.Roles
-	case "Mute":
-		config.RequiredMuteRoles = data.Roles
-	case "Unmute":
-		config.RequiredUnmuteRoles = data.Roles
-	case "Kick":
-		config.RequiredKickRoles = data.Roles
-	case "Ban":
-		config.RequiredBanRoles = data.Roles
-	case "Unban":
-		config.RequiredUnbanRoles = data.Roles
-	}
-
-	config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("ok"))
 }
 
 func getGuildModerationRestrictions(guildID string) map[string]interface{} {

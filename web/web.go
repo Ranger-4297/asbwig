@@ -80,11 +80,9 @@ func setupWebRoutes() *goji.Mux {
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix"), handleUpdatePrefix)
 	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-prefix/"), handleUpdatePrefix)
 
-	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel"), handleUpdateModlog)
-	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-channel/"), handleUpdateModlog)
-	
-	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-roles"), handleUpdateModerationRoles)
-	DashboardMultiplexer.HandleFunc(pat.Post("/manage/update-roles/"), handleUpdateModerationRoles)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration"), handleUpdateModeration)
+	DashboardMultiplexer.HandleFunc(pat.Post("/manage/updateModeration/"), handleUpdateModeration)
+
 	return RootMultiplexer
 }
 
