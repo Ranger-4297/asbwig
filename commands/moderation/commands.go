@@ -79,6 +79,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		enabled := isEnabled(data.GuildID)
+		guild := functions.GetGuild(data.GuildID)
 		if !enabled {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
 			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 30*time.Second)
@@ -98,7 +99,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 			return
 		}
 		ok = functions.IsMemberHigher(data.GuildID, author, target)
-		if !ok {
+		if (!ok || target.User.ID == guild.OwnerID) {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
 			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher role).")
 			return
