@@ -4,6 +4,10 @@ var GuildModerationSchema = []string{`
 CREATE TABLE IF NOT EXISTS moderation_config (
 	guild_id TEXT PRIMARY KEY,
 	enabled BOOL DEFAULT FALSE NOT NULL,
+	enabled_trigger_deletion BOOL DEFAULT FALSE NOT NULL,
+	seconds_to_delete_trigger INT DEFAULT 0 NOT NULL,
+	enabled_response_deletion BOOL DEFAULT FALSE NOT NULL,
+	seconds_to_delete_response INT DEFAULT 0 NOT NULL,
 	mod_log TEXT,
 	required_warn_roles TEXT[],
 	required_mute_roles TEXT[],
