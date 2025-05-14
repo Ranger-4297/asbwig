@@ -19,19 +19,23 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // ModerationConfig is an object representing the database table.
 type ModerationConfig struct {
-	GuildID                 string      `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	Enabled                 bool        `boil:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
-	EnabledTriggerDeletion  bool        `boil:"enabled_trigger_deletion" json:"enabled_trigger_deletion" toml:"enabled_trigger_deletion" yaml:"enabled_trigger_deletion"`
-	SecondsToDeleteTrigger  int         `boil:"seconds_to_delete_trigger" json:"seconds_to_delete_trigger" toml:"seconds_to_delete_trigger" yaml:"seconds_to_delete_trigger"`
-	EnabledResponseDeletion bool        `boil:"enabled_response_deletion" json:"enabled_response_deletion" toml:"enabled_response_deletion" yaml:"enabled_response_deletion"`
-	SecondsToDeleteResponse int         `boil:"seconds_to_delete_response" json:"seconds_to_delete_response" toml:"seconds_to_delete_response" yaml:"seconds_to_delete_response"`
-	ModLog                  null.String `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
-	LastCaseID              int64       `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
+	GuildID                 string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	Enabled                 bool              `boil:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
+	EnabledTriggerDeletion  bool              `boil:"enabled_trigger_deletion" json:"enabled_trigger_deletion" toml:"enabled_trigger_deletion" yaml:"enabled_trigger_deletion"`
+	SecondsToDeleteTrigger  int               `boil:"seconds_to_delete_trigger" json:"seconds_to_delete_trigger" toml:"seconds_to_delete_trigger" yaml:"seconds_to_delete_trigger"`
+	EnabledResponseDeletion bool              `boil:"enabled_response_deletion" json:"enabled_response_deletion" toml:"enabled_response_deletion" yaml:"enabled_response_deletion"`
+	SecondsToDeleteResponse int               `boil:"seconds_to_delete_response" json:"seconds_to_delete_response" toml:"seconds_to_delete_response" yaml:"seconds_to_delete_response"`
+	ModLog                  null.String       `boil:"mod_log" json:"mod_log,omitempty" toml:"mod_log" yaml:"mod_log,omitempty"`
+	ManageMuteRole          bool              `boil:"manage_mute_role" json:"manage_mute_role" toml:"manage_mute_role" yaml:"manage_mute_role"`
+	MuteRole                null.String       `boil:"mute_role" json:"mute_role,omitempty" toml:"mute_role" yaml:"mute_role,omitempty"`
+	UpdateRoles             types.StringArray `boil:"update_roles" json:"update_roles,omitempty" toml:"update_roles" yaml:"update_roles,omitempty"`
+	LastCaseID              int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -45,6 +49,9 @@ var ModerationConfigColumns = struct {
 	EnabledResponseDeletion string
 	SecondsToDeleteResponse string
 	ModLog                  string
+	ManageMuteRole          string
+	MuteRole                string
+	UpdateRoles             string
 	LastCaseID              string
 }{
 	GuildID:                 "guild_id",
@@ -54,6 +61,9 @@ var ModerationConfigColumns = struct {
 	EnabledResponseDeletion: "enabled_response_deletion",
 	SecondsToDeleteResponse: "seconds_to_delete_response",
 	ModLog:                  "mod_log",
+	ManageMuteRole:          "manage_mute_role",
+	MuteRole:                "mute_role",
+	UpdateRoles:             "update_roles",
 	LastCaseID:              "last_case_id",
 }
 
@@ -65,6 +75,9 @@ var ModerationConfigTableColumns = struct {
 	EnabledResponseDeletion string
 	SecondsToDeleteResponse string
 	ModLog                  string
+	ManageMuteRole          string
+	MuteRole                string
+	UpdateRoles             string
 	LastCaseID              string
 }{
 	GuildID:                 "moderation_config.guild_id",
@@ -74,6 +87,9 @@ var ModerationConfigTableColumns = struct {
 	EnabledResponseDeletion: "moderation_config.enabled_response_deletion",
 	SecondsToDeleteResponse: "moderation_config.seconds_to_delete_response",
 	ModLog:                  "moderation_config.mod_log",
+	ManageMuteRole:          "moderation_config.manage_mute_role",
+	MuteRole:                "moderation_config.mute_role",
+	UpdateRoles:             "moderation_config.update_roles",
 	LastCaseID:              "moderation_config.last_case_id",
 }
 
@@ -111,6 +127,32 @@ func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
+
 var ModerationConfigWhere = struct {
 	GuildID                 whereHelperstring
 	Enabled                 whereHelperbool
@@ -119,6 +161,9 @@ var ModerationConfigWhere = struct {
 	EnabledResponseDeletion whereHelperbool
 	SecondsToDeleteResponse whereHelperint
 	ModLog                  whereHelpernull_String
+	ManageMuteRole          whereHelperbool
+	MuteRole                whereHelpernull_String
+	UpdateRoles             whereHelpertypes_StringArray
 	LastCaseID              whereHelperint64
 }{
 	GuildID:                 whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
@@ -128,6 +173,9 @@ var ModerationConfigWhere = struct {
 	EnabledResponseDeletion: whereHelperbool{field: "\"moderation_config\".\"enabled_response_deletion\""},
 	SecondsToDeleteResponse: whereHelperint{field: "\"moderation_config\".\"seconds_to_delete_response\""},
 	ModLog:                  whereHelpernull_String{field: "\"moderation_config\".\"mod_log\""},
+	ManageMuteRole:          whereHelperbool{field: "\"moderation_config\".\"manage_mute_role\""},
+	MuteRole:                whereHelpernull_String{field: "\"moderation_config\".\"mute_role\""},
+	UpdateRoles:             whereHelpertypes_StringArray{field: "\"moderation_config\".\"update_roles\""},
 	LastCaseID:              whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
 }
 
@@ -179,9 +227,9 @@ func (r *moderationConfigR) GetGuildModerationMutes() ModerationMuteSlice {
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "last_case_id"}
+	moderationConfigAllColumns            = []string{"guild_id", "enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "manage_mute_role", "mute_role", "update_roles", "last_case_id"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "last_case_id"}
+	moderationConfigColumnsWithDefault    = []string{"enabled", "enabled_trigger_deletion", "seconds_to_delete_trigger", "enabled_response_deletion", "seconds_to_delete_response", "mod_log", "manage_mute_role", "mute_role", "update_roles", "last_case_id"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )

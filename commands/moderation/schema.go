@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS moderation_config (
 	enabled_response_deletion BOOL DEFAULT FALSE NOT NULL,
 	seconds_to_delete_response INT DEFAULT 0 NOT NULL,
 	mod_log TEXT,
+	manage_mute_role BOOL DEFAULT FALSE NOT NULL,
+	mute_role TEXT,
+	update_roles TEXT[],
 	last_case_id BIGINT DEFAULT 0 NOT NULL
 );
 `,`
