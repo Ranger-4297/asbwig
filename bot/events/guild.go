@@ -26,6 +26,7 @@ func guildJoin(s *discordgo.Session, g *discordgo.GuildCreate) {
 		common.Session.GuildLeave(g.ID)
 		return
 	}
+	moderation.RefreshMuteSettings(g.ID)
 	prefix.GuildPrefix(g.ID)
 	economy.GuildEconomyAdd(g.ID)
 	moderation.GuildModerationAdd(g.ID)
