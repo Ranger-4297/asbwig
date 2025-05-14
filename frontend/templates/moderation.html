@@ -34,10 +34,11 @@
 						</label>
 					</div>
 					<h2 class="mb-0">Moderation</h2>
+					<button type="submit" id="saveAllButton" class="btn text-light saveAllButton" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey); margin-left: 1rem;">
+						Save all
+					</button>
 				</div>
-				<button type="submit" id="saveAllButton" class="btn text-light saveAllButton" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">
-					Save all
-				</button>
+				<a href="{{.URL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light" role="button" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back to server home</a>
 			</div>
 			<div class="container-fluid my-4 px-0">
 				<div class="row">
@@ -140,7 +141,21 @@
 									<input type="hidden" id="requiredRoles{{index $moderationAction .}}Input">
 									<button type="submit" class="btn text-light saveRolesButton" data-action="{{index $moderationAction .}}" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
-								{{if eq (index $moderationAction .) "Mute"}}
+							</div>
+						</div>
+					</div>
+					{{end}}
+				</div>
+			</div>
+			<h2 style="margin-top: 2px; margin-bottom: 0px;">Command settings</h2>
+			<div id="settings" class="container-fluid my-4 px-0" data-updatemuteroles="{{.CurrentGuild.ModerationConfig.MuteUpdateRole | toJson | html}}">
+				<div class="row">
+					<div class="col-md-4 mb-4">
+						<div class="card Mute">
+							<div class="card-header">
+								<h5>Mute settings</h5>
+							</div>
+							<div class="card-body">
 								<p class="card-text">Role given when a user is muted.</p>
 								<div class="input-group mb-3">
 									<button class="btn dropdown-toggle text-start flex-grow-1 text-white" type="button" data-bs-toggle="dropdown" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
@@ -190,11 +205,9 @@
 									<input type="hidden" id="updateRolesInput">
 									<button type="submit" class="btn text-light saveMuteRolesButton" id="saveMuteRolesButton" data-action="updateRoles" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
-								{{end}}
 							</div>
 						</div>
 					</div>
-					{{end}}
 				</div>
 			</div>
 		</div>
