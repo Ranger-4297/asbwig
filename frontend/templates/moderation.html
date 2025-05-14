@@ -35,10 +35,12 @@
 				<h2>Moderation</h2>
 			</div>
 			<div class="container-fluid my-4 px-0">
-				<div class="row row-cols-1 row-cols-md-3 g-4">
-					<div class="col">
+				<div class="row">
+					<div class="col-md-4 mb-4">
 						<div class="card">
-							<h5 class="card-header">Modlog channel</h5>
+							<div class="card-header">
+								<h5>Modlog channel</h5>
+							</div>
 							<div class="card-body">
 								<p class="card-text">Note: If <code>None</code> is selected, moderation commands won't run.</p>
 								<div class="input-group mb-3">
@@ -53,8 +55,48 @@
 										{{end}}
 										{{end}}
 									</ul>
-									<input type="hidden" name="modlogChannel" id="modlogInput">
+									<input type="hidden" id="modlogInput">
 									<button type="submit" data-action="modlog" id="saveModlogButton" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4 mb-4">
+						<div class="card">
+							<div class="d-flex align-items-center card-header">
+								<label class="switch">
+									<input type="checkbox" id="toggleTriggerDeletion" {{if .CurrentGuild.ModerationConfig.TriggerSettings.Enabled}}checked{{end}}>
+									<span class="slider" style="left: 5px;"></span>
+									<span class="knob" style="left: 7px;"></span>
+								</label>
+								<h5>Trigger deletion</h5>
+							</div>
+							<div class="card-body">
+								<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
+								<div class="input-group mb-3">
+									<input type="number" id="triggerInput" min="0" step="1" max="60" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" {{if .CurrentGuild.ModerationConfig.TriggerSettings.Seconds}}value="{{.CurrentGuild.ModerationConfig.TriggerSettings.Seconds}}"{{end}}>
+									<span class="input-group-text text-light" id="basic-addon2" style="background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)">seconds</span>
+									<button type="submit" data-action="trigger" id="saveTriggerButton" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4 mb-4">
+						<div class="card">
+							<div class="d-flex align-items-center card-header">
+								<label class="switch">
+									<input type="checkbox" id="toggleResponseDeletion" {{if .CurrentGuild.ModerationConfig.ResponseSettings.Enabled}}checked{{end}}>
+									<span class="slider" style="left: 5px;"></span>
+									<span class="knob" style="left: 7px;"></span>
+								</label>
+								<h5>Response deletion</h5>
+							</div>
+							<div class="card-body">
+								<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
+								<div class="input-group mb-3">
+									<input type="number" id="responseInput" min="0" step="1" max="60" class="form-control text-light" placeholder="0" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" {{if .CurrentGuild.ModerationConfig.ResponseSettings.Seconds}}value="{{.CurrentGuild.ModerationConfig.ResponseSettings.Seconds}}"{{end}}>
+									<span class="input-group-text text-light" id="basic-addon2" style="background-color: var(--primaryTetiaryPurple); border: 1px solid var(--accentGrey)">seconds</span>
+									<button type="submit" data-action="response" id="saveResponseButton" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
 							</div>
 						</div>
@@ -68,7 +110,9 @@
 					{{range (seq 1 6)}}
 					<div class="col-md-4 mb-4">
 						<div class="card {{index $moderationAction .}}">
-							<h5 class="card-header">{{- index $moderationAction . -}}s</h5>
+							<div class="card-header">
+								<h5>{{- index $moderationAction . -}}s</h5>
+							</div>
 							<div class="card-body">
 								<p class="card-text">Required moderator roles</p>
 								<div class="input-group mb-3">
@@ -88,7 +132,7 @@
 										</li>
 										{{end}}
 									</ul>
-									<input type="hidden" name="requiredRoles" id="requiredRoles{{index $moderationAction .}}Input">
+									<input type="hidden" id="requiredRoles{{index $moderationAction .}}Input">
 									<button type="submit" class="btn text-light saveRolesButton" data-action="{{index $moderationAction .}}" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
 							</div>
