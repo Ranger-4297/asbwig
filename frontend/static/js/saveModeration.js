@@ -1,4 +1,4 @@
-function submitModerationUpdate({ enabled = null, modlog = null, roles = null, triggerStatus = null, triggerInput = null, responseStatus = null, responseInput = null, update }) {
+function submitModerationUpdate({ enabled = null, modlog = null, triggerStatus = null, triggerInput = null, responseStatus = null, responseInput = null, roles = null, muteRole = null, managedMuteRole = null, updateRoles = null, update }) {
 	const baseurl = document.body.getAttribute('data-url');
 	const guildID = document.body.getAttribute('data-guild-id');
 	const url = `${baseurl}/dashboard/${guildID}/manage/updateModeration`;
@@ -6,11 +6,14 @@ function submitModerationUpdate({ enabled = null, modlog = null, roles = null, t
 	const body = { update };
 	if (enabled !== null) body.enabled = enabled;
 	if (modlog !== null) body.modlog = modlog;
-	if (roles !== null) body.roles = roles;
 	if (triggerStatus !== null) body.triggerStatus = triggerStatus;
 	if (triggerInput !== null) body.triggerInput = triggerInput;
 	if (responseStatus !== null) body.responseStatus = responseStatus;
 	if (responseInput !== null) body.responseInput = responseInput;
+	if (roles !== null) body.roles = roles;
+	if (muteRole !== null) body.muteRole = muteRole
+	if (managedMuteRole !== null) body.managedMuteRole = managedMuteRole
+	if (updateRoles !== null) body.updateRoles = updateRoles;
 
 	fetch(url, {
 		method: 'POST',
@@ -20,6 +23,7 @@ function submitModerationUpdate({ enabled = null, modlog = null, roles = null, t
 		body: JSON.stringify(body)
 	}).then(() => {
 		if (enabled == null && responseStatus == null && triggerStatus == null) {
+			console.log(body)
 			const alert = document.getElementById('successAlert');
 			if (alert) {
 				alert.style.display = 'block';
@@ -49,6 +53,8 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 	const responseInput = document.getElementById('responseInput').value.trim();
 	const roleActions = ['Warn', 'Mute', 'Unmute', 'Kick', 'Ban', 'Unban'];
 	const roles = {};
+	const muteRoleInput = document.getElementById('muteRoleInput').value.trim();
+	const updateRolesInput = document.getElementById('updateRolesInput').value.trim();
 
 	roleActions.forEach(action => {
 		const input = document.getElementById(`requiredRoles${action}Input`);
@@ -60,6 +66,8 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 		roles: roles,
 		triggerInput: triggerInput,
 		responseInput: responseInput,
+		muteRole: muteRoleInput,
+		updateRoles: JSON.parse(updateRolesInput),
 		update: "all"
 	});
 });
@@ -72,24 +80,6 @@ document.getElementById('saveModlogButton').addEventListener('click', function (
 	submitModerationUpdate({
 		modlog: modlogInput,
 		update: "modlog"
-	});
-});
-
-// Save individual roles input
-document.querySelectorAll('.saveRolesButton').forEach(button => {
-	button.addEventListener('click', function (e) {
-		e.preventDefault();
-
-		const action = this.getAttribute('data-action');
-
-		const input = document.getElementById(`requiredRoles${action}Input`);
-		const roles = {};
-		roles[action] = JSON.parse(input.value || "[]");
-
-		submitModerationUpdate({
-			roles: roles,
-			update: action
-		});
 	});
 });
 
@@ -112,6 +102,46 @@ document.getElementById('saveResponseButton').addEventListener('click', function
 	submitModerationUpdate({
 		responseInput: responseInput,
 		update: "responseInput"
+	});
+});
+
+// Save individual roles input
+document.querySelectorAll('.saveRolesButton').forEach(button => {
+	button.addEventListener('click', function (e) {
+		e.preventDefault();
+
+		const action = this.getAttribute('data-action');
+
+		const input = document.getElementById(`requiredRoles${action}Input`);
+		const roles = {};
+		roles[action] = JSON.parse(input.value || "[]");
+
+		submitModerationUpdate({
+			roles: roles,
+			update: action
+		});
+	});
+});
+
+// Save mute role
+document.getElementById('saveMuteRoleButton').addEventListener('click', function (e) {
+	e.preventDefault();
+
+	const muteRoleInput = document.getElementById('muteRoleInput').value.trim();
+	submitModerationUpdate({
+		muteRole: muteRoleInput,
+		update: "muteRole"
+	});
+});
+
+// Save managed mute roles
+document.getElementById('saveMuteRolesButton').addEventListener('click', function (e) {
+	e.preventDefault();
+
+	const updateRolesInput = document.getElementById('updateRolesInput').value.trim();
+	submitModerationUpdate({
+		updateRoles: updateRolesInput,
+		update: "updateRoles"
 	});
 });
 
@@ -146,6 +176,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			submitModerationUpdate({
 				responseStatus: responseToggle.checked,
 				update: "responseStatus"
+			});
+		}));
+	}
+
+	// Managed mute role toggle
+	const muteRoleToggle = document.getElementById('toggleManagedMuteRole');
+	if (muteRoleToggle) {
+		muteRoleToggle.addEventListener('change', debounce(() => {
+			submitModerationUpdate({
+				managedMuteRole: muteRoleToggle.checked,
+				update: "manageMuteRole"
 			});
 		}));
 	}
