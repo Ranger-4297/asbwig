@@ -37,7 +37,7 @@ main {
 	scrollbar-gutter: stable;
 }
 h5 {
-	padding: 0;
+	margin: 0;
 }
 
 main::-webkit-scrollbar {
@@ -187,7 +187,7 @@ ul.dropdown-menu::-webkit-scrollbar {
 }
 ul.dropdown-menu::-webkit-scrollbar-thumb {
 	background-color: var(--accentGrey);
-		border-radius: 0px 5px 5px 0px;
+	border-radius: 0px 5px 5px 0px;
 }
 ul.dropdown-menu::-webkit-scrollbar-track {
 	background: var(--basePurple);
@@ -248,8 +248,16 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 .switch input:checked ~ .knob {
 	transform: translateX(0.9rem) translateY(-50%);
 }
-
+#toggleMuteManagement {
+	margin-left: 0;
+	margin-right: 0.5rem;
+}
 #responseInput:focus, #triggerInput:focus {
 	outline: none;
 	box-shadow: none;
+}
+
+.form-check-input {
+	margin-left: 0px !important;
+	margin-right: 0.5rem
 }
