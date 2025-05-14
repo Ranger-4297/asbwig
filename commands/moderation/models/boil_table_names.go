@@ -7,8 +7,10 @@ var TableNames = struct {
 	ModerationCases       string
 	ModerationConfig      string
 	ModerationConfigRoles string
+	ModerationMutes       string
 }{
 	ModerationCases:       "moderation_cases",
 	ModerationConfig:      "moderation_config",
 	ModerationConfigRoles: "moderation_config_roles",
+	ModerationMutes:       "moderation_mutes",
 }
