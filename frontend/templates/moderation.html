@@ -141,7 +141,7 @@
 									<button type="submit" class="btn text-light saveRolesButton" data-action="{{index $moderationAction .}}" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Save</button>
 								</div>
 								{{if eq (index $moderationAction .) "Mute"}}
-								<p class="card-text">This is what role is given when a user is muted</p>
+								<p class="card-text">Role given when a user is muted.</p>
 								<div class="input-group mb-3">
 									<button class="btn dropdown-toggle text-start flex-grow-1 text-white" type="button" data-bs-toggle="dropdown" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
 										<span id="muteRoleLabel">Select role</span>
@@ -165,11 +165,11 @@
 											<span class="slider" style="left: 5px;"></span>
 											<span class="knob" style="left: 7px;"></span>
 										</label>
-										Enable the bot to manage the mute role
+										Enable the bot to manage the mute role.
 									</div>
 								</div>
 								<hr>
-								<p class="card-text">Remove and re-add the following roles</p>
+								<p class="card-text">Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</p>
 								<div class="input-group mb-3 dropup">
 									<button class="btn dropdown-toggle text-start flex-grow-1 text-white requiredRolesDropdown" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
 										<span id="updateRolesLabel">Select roles</span>
