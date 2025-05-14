@@ -2,6 +2,7 @@ package moderation
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -54,6 +55,29 @@ func hasCommandPermissions(guildID string, user *discordgo.Member, requireType s
 	return false
 }
 
+func triggerDeltion(guildID string) (bool, int) {
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	return config.EnabledTriggerDeletion, config.SecondsToDeleteTrigger
+}
+
+func responseDeletion(guildID string) (bool, int) {
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	return config.EnabledResponseDeletion, config.SecondsToDeleteResponse
+}
+
+
+// response returns the fully-populated embed for responses
+func responseEmbed(author, target *discordgo.User, embedDisplay string, action logAction) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Author: &discordgo.MessageEmbedAuthor{
+			Name:    fmt.Sprintf("Case type: %s", embedDisplay),
+			IconURL: author.AvatarURL("1024"),
+		},
+		Description: fmt.Sprintf("%s has successfully %s %s :thumbsup:", author.Mention(), action.Name, target.Mention()),
+		Color: 0x242429,
+	}
+}
+
 var warnCommand = &dcommand.AsbwigCommand{
 	Command:     "warn",
 	Category: 	 dcommand.CategoryModeration,
@@ -95,6 +119,16 @@ var warnCommand = &dcommand.AsbwigCommand{
 		if err != nil {
 			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 30*time.Second)
 			return
+		}
+		ok, delay := triggerDeltion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+		}
+		responseEmbed := responseEmbed(author.User, target.User, "Warning", logWarn)
+		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+		ok, delay = responseDeletion(data.GuildID)
+			if ok {
+			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
 		}
 	},
 }
