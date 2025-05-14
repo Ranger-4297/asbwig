@@ -130,35 +130,35 @@ func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 func getUserManagedGuilds(userID string) map[string]string {
 	managedGuilds := make(map[string]string)
 	for _, guild := range common.Session.State.Guilds {
-        member, err := common.Session.GuildMember(guild.ID, userID)
-        if err != nil {
-            continue
-        }
-        managed := isUserManaged(guild.ID, member)
-        if managed {
+		member, err := common.Session.GuildMember(guild.ID, userID)
+		if err != nil {
+			continue
+		}
+		managed := isUserManaged(guild.ID, member)
+		if managed {
 			// Store the guild ID and name in the map
-            managedGuilds[guild.ID] = guild.Name
-        }
-    }
-	
-    return managedGuilds
+			managedGuilds[guild.ID] = guild.Name
+		}
+	}
+
+	return managedGuilds
 }
 
 // isUserManaged returns a boolean of whether or not the user has the permissions to manage the guild
 // Permissions required are: Owner, Manage Server or Administrator 
 func isUserManaged(guildID string, member *discordgo.Member) bool {
 	guild, err := common.Session.State.Guild(guildID)
-    if err == nil && guild.OwnerID == member.User.ID {
-        return true
-    }
+	if err == nil && guild.OwnerID == member.User.ID {
+		return true
+	}
 	for _, roleID := range member.Roles {
 		role, err := common.Session.State.Role(guildID, roleID)
 		if err == nil {
 			continue
 		}
 		if (role.Permissions&discordgo.PermissionAdministrator != 0) || (role.Permissions&discordgo.PermissionManageServer != 0) {
-            return true
-        }
+			return true
+		}
 	}
 	return false
 }
@@ -166,7 +166,7 @@ func isUserManaged(guildID string, member *discordgo.Member) bool {
 // dashboardContextData returns all the necessary context data that we use within the site into one data map
 func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	userData, _ := checkCookie(w, r)
-    userID, _ := userData["id"].(string)
+	userID, _ := userData["id"].(string)
 
 	// Set the list of guilds that the user manages
 	guilds := getUserManagedGuilds(userID)
@@ -206,35 +206,35 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions
 func validateGuild(inner http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        guildIDStr := pat.Param(r, "server")
-        _, err := strconv.ParseInt(guildIDStr, 10, 64)
-        if err != nil {
-            http.Redirect(w, r, "/?error=invalid_guild", http.StatusFound)
-            return
-        }
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		guildIDStr := pat.Param(r, "server")
+		_, err := strconv.ParseInt(guildIDStr, 10, 64)
+		if err != nil {
+			http.Redirect(w, r, "/?error=invalid_guild", http.StatusFound)
+			return
+		}
 
-        userData, err := checkCookie(w, r)
-        if err != nil {
-            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
-            return
-        }
+		userData, err := checkCookie(w, r)
+		if err != nil {
+			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
+			return
+		}
 
-        userID, _ := userData["id"].(string)
-        user, err := functions.GetMember(guildIDStr, userID)
-        if err != nil {
-            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
-            return
-        }
+		userID, _ := userData["id"].(string)
+		user, err := functions.GetMember(guildIDStr, userID)
+		if err != nil {
+			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
+			return
+		}
 
-        managed := isUserManaged(guildIDStr, user)
-        if !managed {
-            http.Redirect(w, r, "/?error=no_access", http.StatusFound)
-            return
-        }
+		managed := isUserManaged(guildIDStr, user)
+		if !managed {
+			http.Redirect(w, r, "/?error=no_access", http.StatusFound)
+			return
+		}
 
-        inner.ServeHTTP(w, r)
-    })
+		inner.ServeHTTP(w, r)
+	})
 }
 
 // getGuildData retrieves select data about the guild to use within the manage page of the dashboard
@@ -269,7 +269,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 func getGuildModerationSettings(guildID string) map[string]interface{} {
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
 	commandRestrictions := getRoleRestrictions(guildID)
-		triggerSettings := map[string]interface{}{
+	triggerSettings := map[string]interface{}{
 		"Enabled": config.EnabledTriggerDeletion,
 		"Seconds": config.SecondsToDeleteTrigger,
 	}
@@ -283,6 +283,9 @@ func getGuildModerationSettings(guildID string) map[string]interface{} {
 		"Restrictions": commandRestrictions,
 		"TriggerSettings": triggerSettings,
 		"ResponseSettings": responseSettings,
+		"MuteRole": config.MuteRole.String,
+		"ManageMuteRole": config.ManageMuteRole,
+		"MuteUpdateRole": config.UpdateRoles,
 	}
 	return moderationSettings
 }
@@ -313,30 +316,35 @@ func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
-    defer r.Body.Close()
-    var data struct {
+	defer r.Body.Close()
+	var data struct {
+		Update string `json:"update"`
 		Enabled bool `json:"enabled"`
-        Modlog string `json:"modlog"`
-        Roles map[string][]string `json:"roles"`
-        TriggerStatus bool `json:"triggerStatus"`
-        TriggerInput int `json:"triggerInput"`
-        ResponseStatus bool `json:"responseStatus"`
-        ResponseInput int `json:"responseInput"`
-        Update string `json:"update"`
-    }
-    json.NewDecoder(r.Body).Decode(&data)
-    server := pat.Param(r, "server")
+		Modlog string `json:"modlog"`
+		TriggerStatus bool `json:"triggerStatus"`
+		TriggerInput int `json:"triggerInput"`
+		ResponseStatus bool `json:"responseStatus"`
+		ResponseInput int `json:"responseInput"`
+		Roles map[string][]string `json:"roles"`
+		MuteRole string `json:"muteRole"`
+		ManagedMuteRole string `json:"managedMuteRole"`
+		UpdateRoles []string `json:"updateRoles"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+	server := pat.Param(r, "server")
 
-    config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
-    switch data.Update {
-    case "all":
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", server)).One(context.Background(), common.PQ)
+	switch data.Update {
+	case "all":
 		config.ModLog = null.StringFrom(data.Modlog)
-        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+		config.UpdateRoles = data.UpdateRoles
+		config.MuteRole = null.NewString(data.MuteRole, true)
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log", "update_roles", "mute_role"), boil.Infer())
 		updateAllRoles(server, data.Roles)
-    case "modlog":
-        config.ModLog = null.StringFrom(data.Modlog)
-        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
-    case "Warn", "Mute", "Unmute", "Kick", "Ban", "Unban":
+	case "modlog":
+		config.ModLog = null.StringFrom(data.Modlog)
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+	case "Warn", "Mute", "Unmute", "Kick", "Ban", "Unban":
 		whitelist := "required_" + strings.ToLower(data.Update) +"_roles"
 		actionRoles := data.Roles[data.Update]
 		updateRoles(server, data.Update, actionRoles)
@@ -358,18 +366,24 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 	case "triggerInput", "responseInput":
 		whitelist := ""
 		switch data.Update {
-			case "triggerInput":
-				whitelist = "seconds_to_delete_trigger"
-				config.SecondsToDeleteTrigger = data.TriggerInput
-			case "responseInput":
-				whitelist = "seconds_to_delete_response"
-				config.SecondsToDeleteResponse = data.ResponseInput
+		case "triggerInput":
+			whitelist = "seconds_to_delete_trigger"
+			config.SecondsToDeleteTrigger = data.TriggerInput
+		case "responseInput":
+			whitelist = "seconds_to_delete_response"
+			config.SecondsToDeleteResponse = data.ResponseInput
 		}
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-    }
+	case "updateRoles":
+		config.UpdateRoles = data.UpdateRoles
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("update_roles"), boil.Infer())
+	case "muteRole":
+		config.MuteRole = null.NewString(data.MuteRole, true)
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mute_role"), boil.Infer())
+	}
 
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("ok"))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
 }
 
 
