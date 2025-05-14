@@ -75,7 +75,7 @@ function initRoleCheckboxes() {
 }
 
 function populateInitialRoleConfig() {
-	const commandRestrictions = JSON.parse(document.getElementById('settings').getAttribute('data-restrictions'));
+	const commandRestrictions = JSON.parse(document.getElementById('restrictions').getAttribute('data-restrictions'));
 
 	for (const [action, roleIDs] of Object.entries(commandRestrictions)) {
 		if (!Array.isArray(roleIDs)) continue;
@@ -121,7 +121,7 @@ function initMuteRolesCheckboxes() {
 }
 
 function populateInitialMuteRoleConfig() {
-	const muteRoles = JSON.parse(document.getElementById('settings').getAttribute('data-updatemuteroles'));
+	const muteRoles = JSON.parse(document.getElementById('restrictions').getAttribute('data-updatemuteroles'));
 
 	if (!Array.isArray(muteRoles)) return;
 
