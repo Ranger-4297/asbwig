@@ -14,6 +14,7 @@ import (
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/bot/prefix"
+	"github.com/RhykerWells/asbwig/commands/moderation"
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
@@ -381,6 +382,8 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 		config.MuteRole = null.NewString(data.MuteRole, true)
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mute_role"), boil.Infer())
 	}
+
+	moderation.RefreshMuteSettings(server)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
