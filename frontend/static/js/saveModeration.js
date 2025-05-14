@@ -2,7 +2,7 @@ function submitModerationUpdate({ enabled = null, modlog = null, roles = null, t
 	const baseurl = document.body.getAttribute('data-url');
 	const guildID = document.body.getAttribute('data-guild-id');
 	const url = `${baseurl}/dashboard/${guildID}/manage/updateModeration`;
-	
+
 	const body = { update };
 	if (enabled !== null) body.enabled = enabled;
 	if (modlog !== null) body.modlog = modlog;
@@ -11,7 +11,7 @@ function submitModerationUpdate({ enabled = null, modlog = null, roles = null, t
 	if (triggerInput !== null) body.triggerInput = triggerInput;
 	if (responseStatus !== null) body.responseStatus = responseStatus;
 	if (responseInput !== null) body.responseInput = responseInput;
-	
+
 	fetch(url, {
 		method: 'POST',
 		headers: {
@@ -32,21 +32,29 @@ function submitModerationUpdate({ enabled = null, modlog = null, roles = null, t
 	}).catch(console.error);
 }
 
+function debounce(func, delay = 300) {
+	let timeout;
+	return function (...args) {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => func.apply(this, args), delay);
+	};
+}
+
 // Save all input fields
 document.getElementById('saveAllButton').addEventListener('click', function (e) {
 	e.preventDefault();
-	
+
 	const modlogInput = document.getElementById('modlogInput').value.trim();
 	const triggerInput = document.getElementById('triggerInput').value.trim();
 	const responseInput = document.getElementById('responseInput').value.trim();
 	const roleActions = ['Warn', 'Mute', 'Unmute', 'Kick', 'Ban', 'Unban'];
 	const roles = {};
-	
+
 	roleActions.forEach(action => {
 		const input = document.getElementById(`requiredRoles${action}Input`);
 		roles[action] = JSON.parse(input.value || "[]");
 	});
-	
+
 	submitModerationUpdate({
 		modlog: modlogInput,
 		roles: roles,
@@ -59,7 +67,7 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 // Save modlog input
 document.getElementById('saveModlogButton').addEventListener('click', function (e) {
 	e.preventDefault();
-	
+
 	const modlogInput = document.getElementById('modlogInput').value.trim();
 	submitModerationUpdate({
 		modlog: modlogInput,
@@ -71,13 +79,13 @@ document.getElementById('saveModlogButton').addEventListener('click', function (
 document.querySelectorAll('.saveRolesButton').forEach(button => {
 	button.addEventListener('click', function (e) {
 		e.preventDefault();
-		
+
 		const action = this.getAttribute('data-action');
-		
+
 		const input = document.getElementById(`requiredRoles${action}Input`);
 		const roles = {};
 		roles[action] = JSON.parse(input.value || "[]");
-		
+
 		submitModerationUpdate({
 			roles: roles,
 			update: action
@@ -90,33 +98,33 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Moderation toggle
 	const moderationToggle = document.getElementById('toggleModeration');
 	if (moderationToggle) {
-		moderationToggle.addEventListener('change', () => {
+		moderationToggle.addEventListener('change', debounce(() => {
 			submitModerationUpdate({
 				enabled: moderationToggle.checked,
 				update: "status"
 			});
-		});
+		}));
 	}
 
 	// Trigger toggle
 	const triggerToggle = document.getElementById('toggleTriggerDeletion');
 	if (triggerToggle) {
-		triggerToggle.addEventListener('change', () => {
+		triggerToggle.addEventListener('change', debounce(() => {
 			submitModerationUpdate({
 				triggerStatus: triggerToggle.checked,
 				update: "triggerStatus"
 			});
-		});
+		}));
 	}
 
 	// Response toggle
 	const responseToggle = document.getElementById('toggleResponseDeletion');
 	if (responseToggle) {
-		responseToggle.addEventListener('change', () => {
+		responseToggle.addEventListener('change', debounce(() => {
 			submitModerationUpdate({
 				responseStatus: responseToggle.checked,
 				update: "responseStatus"
 			});
-		});
+		}));
 	}
 });
