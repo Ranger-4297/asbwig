@@ -268,14 +268,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 
 func getGuildModerationSettings(guildID string) map[string]interface{} {
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
-	commandRestrictions := map[string]interface{}{
-		"Warn": config.RequiredWarnRoles,
-		"Mute": config.RequiredMuteRoles,
-		"Unmute": config.RequiredUnmuteRoles,
-		"Kick": config.RequiredKickRoles,
-		"Ban": config.RequiredBanRoles,
-		"Unban": config.RequiredUnbanRoles,
-	}
+	commandRestrictions := getRoleRestrictions(guildID)
 		triggerSettings := map[string]interface{}{
 		"Enabled": config.EnabledTriggerDeletion,
 		"Seconds": config.SecondsToDeleteTrigger,
@@ -292,6 +285,15 @@ func getGuildModerationSettings(guildID string) map[string]interface{} {
 		"ResponseSettings": responseSettings,
 	}
 	return moderationSettings
+}
+
+func getRoleRestrictions(guildID string) map[string][]string {
+	roles, _ := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID)).All(context.Background(), common.PQ)
+	commandRestrictions := make(map[string][]string)
+	for _, role := range roles {
+		commandRestrictions[role.ActionType] = append(commandRestrictions[role.ActionType], role.RoleID)
+	}
+	return commandRestrictions
 }
 
 // handleUpdatePrefix changes the guilds prefix in the database with the one provided from the dashboard
@@ -329,33 +331,15 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
     switch data.Update {
     case "all":
 		config.ModLog = null.StringFrom(data.Modlog)
-		config.RequiredWarnRoles = data.Roles["Warn"]
-		config.RequiredMuteRoles = data.Roles["Mute"]
-		config.RequiredUnmuteRoles = data.Roles["Unmute"]
-		config.RequiredKickRoles = data.Roles["Kick"]
-		config.RequiredBanRoles = data.Roles["Ban"]
-		config.RequiredUnbanRoles = data.Roles["Unban"]
-        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log", "required_warn_roles", "required_mute_roles", "required_unmute_roles", "required_kick_roles", "required_ban_roles", "required_unban_roles"), boil.Infer())
+        config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
+		updateAllRoles(server, data.Roles)
     case "modlog":
         config.ModLog = null.StringFrom(data.Modlog)
         config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("mod_log"), boil.Infer())
     case "Warn", "Mute", "Unmute", "Kick", "Ban", "Unban":
 		whitelist := "required_" + strings.ToLower(data.Update) +"_roles"
 		actionRoles := data.Roles[data.Update]
-		switch data.Update {
-        case "Warn":
-            config.RequiredWarnRoles = actionRoles
-        case "Mute":
-            config.RequiredMuteRoles = actionRoles
-        case "Unmute":
-            config.RequiredUnmuteRoles = actionRoles
-        case "Kick":
-            config.RequiredKickRoles = actionRoles
-        case "Ban":
-            config.RequiredBanRoles = actionRoles
-        case "Unban":
-            config.RequiredUnbanRoles = actionRoles
-        }
+		updateRoles(server, data.Update, actionRoles)
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
 	case "status":
 		config.Enabled = data.Enabled
@@ -386,4 +370,49 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("ok"))
+}
+
+
+func updateAllRoles(guildID string, rolesMap map[string][]string) {
+	tx, _ := common.PQ.BeginTx(context.Background(), nil)
+	for actionType, roleIDs := range rolesMap {
+		_, err := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", actionType)).DeleteAll(context.Background(), tx)
+
+		if err != nil {
+			tx.Rollback()
+			break
+		}
+
+		for _, roleID := range roleIDs {
+			role := models.ModerationConfigRole{
+				GuildID:   guildID,
+				ActionType: actionType,
+				RoleID:    roleID,
+			}
+			role.Insert(context.Background(), tx, boil.Infer())
+		}
+	}
+
+	tx.Commit()
+}
+
+func updateRoles(guildID string, roleType string, rolesMap []string) {
+	tx, _ := common.PQ.BeginTx(context.Background(), nil)
+	_, err := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", roleType)).DeleteAll(context.Background(), tx)
+
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	for _, roleID := range rolesMap {
+		role := models.ModerationConfigRole{
+			GuildID:   guildID,
+			ActionType: roleType,
+			RoleID:    roleID,
+		}
+		role.Insert(context.Background(), tx, boil.Infer())
+	}
+
+	tx.Commit()
 }
