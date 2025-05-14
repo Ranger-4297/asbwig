@@ -93,6 +93,28 @@ document.querySelectorAll('.saveRolesButton').forEach(button => {
 	});
 });
 
+// Save trigger delay
+document.getElementById('saveTriggerButton').addEventListener('click', function (e) {
+	e.preventDefault();
+	
+	const triggerInput = parseInt(document.getElementById('triggerInput').value, 10) || 0;
+	submitModerationUpdate({
+		triggerInput: triggerInput,
+		update: "triggerInput"
+	});
+});
+
+// Save response delay
+document.getElementById('saveResponseButton').addEventListener('click', function (e) {
+	e.preventDefault();
+	
+	const responseInput = parseInt(document.getElementById('responseInput').value, 10) || 0;
+	submitModerationUpdate({
+		responseInput: responseInput,
+		update: "responseInput"
+	});
+});
+
 // Save toggle statuses
 document.addEventListener('DOMContentLoaded', () => {
 	// Moderation toggle
