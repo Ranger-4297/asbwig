@@ -313,10 +313,14 @@ func handleUpdatePrefix(w http.ResponseWriter, r *http.Request) {
 func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
     var data struct {
+		Enabled bool `json:"enabled"`
         Modlog string `json:"modlog"`
         Roles map[string][]string `json:"roles"`
+        TriggerStatus bool `json:"triggerStatus"`
+        TriggerInput int `json:"triggerInput"`
+        ResponseStatus bool `json:"responseStatus"`
+        ResponseInput int `json:"responseInput"`
         Update string `json:"update"`
-		Enabled bool `json:"enabled"`
     }
     json.NewDecoder(r.Body).Decode(&data)
     server := pat.Param(r, "server")
@@ -356,6 +360,28 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 	case "status":
 		config.Enabled = data.Enabled
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist("enabled"), boil.Infer())
+	case "triggerStatus", "responseStatus":
+		whitelist := ""
+		switch data.Update {
+		case "triggerStatus":
+			whitelist = "enabled_trigger_deletion"
+			config.EnabledTriggerDeletion = data.TriggerStatus
+		case "responseStatus":
+			whitelist = "enabled_response_deletion"
+			config.EnabledResponseDeletion = data.ResponseStatus
+		}
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
+	case "triggerInput", "responseInput":
+		whitelist := ""
+		switch data.Update {
+			case "triggerInput":
+				whitelist = "seconds_to_delete_trigger"
+				config.SecondsToDeleteTrigger = data.TriggerInput
+			case "responseInput":
+				whitelist = "seconds_to_delete_response"
+				config.SecondsToDeleteResponse = data.ResponseInput
+		}
+		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
     }
 
     w.WriteHeader(http.StatusOK)
