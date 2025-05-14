@@ -17,7 +17,7 @@
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="{{.URL}}/static/css/dashboard.css">
 </head>
-<body class="text-light" data-guild-id="{{.CurrentGuild.ID}}" data-modlog-id="{{.CurrentGuild.Modlog}}" data-url="{{.URL}}">
+<body class="text-light" data-guild-id="{{.CurrentGuild.ID}}" data-modlog-id="{{.CurrentGuild.ModerationConfig.Modlog}}" data-url="{{.URL}}">
 	{{template "dashboard_nav" .}}
 	<div class="alert alert-success" role="alert" id="successAlert" style="display: none;">
 		saved successfully!
@@ -27,7 +27,7 @@
 			<div class="d-flex align-items-center" style="margin-top: 2px; margin-bottom: 0;">
 				<div class="form-check form-switch" style="min-height: unset;">
 					<label class="switch">
-						<input type="checkbox" id="toggleModeration" {{if .CurrentGuild.ModerationEnabled}}checked{{end}}>
+						<input type="checkbox" id="toggleModeration" {{if .CurrentGuild.ModerationConfig.Enabled}}checked{{end}}>
 						<span class="slider" style="left: 5px;"></span>
 						<span class="knob" style="left: 7px;"></span>
 					</label>
@@ -62,7 +62,7 @@
 				</div>
 			</div>
 			<h2 style="margin-top: 2px; margin-bottom: 0px;">Command requirements</h2>
-			<div id="settings" class="container-fluid my-4 px-0" data-restrictions="{{.CurrentGuild.CommandRestrictions | toJson | html}}">
+			<div id="settings" class="container-fluid my-4 px-0" data-restrictions="{{.CurrentGuild.ModerationConfig.Restrictions | toJson | html}}">
 				<div class="row">
 					{{$moderationAction := dict 1 "Warn" 2 "Mute" 3 "Unmute" 4 "Kick" 5 "Ban" 6 "Unban"}}
 					{{range (seq 1 6)}}
@@ -105,5 +105,5 @@
 		</div>
 	</main>
 </body>
-<script src="{{.URL}}/static/js/saveModeration.js"></script>
+<script src="{{.URL}}/static/js/moderation.js"></script>
 </html>
