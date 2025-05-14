@@ -1,12 +1,16 @@
-function submitModerationUpdate({ modlog = null, roles = null, enabled = null, update }) {
+function submitModerationUpdate({ enabled = null, modlog = null, roles = null, triggerStatus = null, triggerInput = null, responseStatus = null, responseInput = null, update }) {
 	const baseurl = document.body.getAttribute('data-url');
 	const guildID = document.body.getAttribute('data-guild-id');
 	const url = `${baseurl}/dashboard/${guildID}/manage/updateModeration`;
 	
 	const body = { update };
+	if (enabled !== null) body.enabled = enabled;
 	if (modlog !== null) body.modlog = modlog;
 	if (roles !== null) body.roles = roles;
-	if (enabled !== null) body.enabled = enabled;
+	if (triggerStatus !== null) body.triggerStatus = triggerStatus;
+	if (triggerInput !== null) body.triggerInput = triggerInput;
+	if (responseStatus !== null) body.responseStatus = responseStatus;
+	if (responseInput !== null) body.triggerInput = responseInput;
 	
 	fetch(url, {
 		method: 'POST',
@@ -15,7 +19,7 @@ function submitModerationUpdate({ modlog = null, roles = null, enabled = null, u
 		},
 		body: JSON.stringify(body)
 	}).then(() => {
-		if (enabled == null) {
+		if (enabled == null && responseStatus == null && triggerStatus == null) {
 			const alert = document.getElementById('successAlert');
 			if (alert) {
 				alert.style.display = 'block';
@@ -33,6 +37,8 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 	e.preventDefault();
 	
 	const modlogInput = document.getElementById('modlogInput').value.trim();
+	const triggerInput = document.getElementById('triggerInput').value.trim();
+	const responseInput = document.getElementById('responseInput').value.trim();
 	const roleActions = ['Warn', 'Mute', 'Unmute', 'Kick', 'Ban', 'Unban'];
 	const roles = {};
 	
@@ -44,6 +50,8 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 	submitModerationUpdate({
 		modlog: modlogInput,
 		roles: roles,
+		triggerInput: triggerInput,
+		responseInput: responseInput,
 		update: "all"
 	});
 });
@@ -93,6 +101,59 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 });
 
+// Save trigger deletion status
+document.addEventListener('DOMContentLoaded', () => {
+	const triggerToggle = document.getElementById('toggleTriggerDeletion');
+
+	if (triggerToggle) {
+		triggerToggle.addEventListener('change', () => {
+			const isEnabled = triggerToggle.checked;
+
+			submitModerationUpdate({
+				triggerStatus: isEnabled,
+				update: "triggerStatus"
+			});
+		});
+	}
+});
+
+// Save trigger time
+document.getElementById('saveTriggerButton').addEventListener('click', function (e) {
+	e.preventDefault();
+	
+	const triggerInput = parseInt(document.getElementById('triggerInput').value, 10) || 0;
+	submitModerationUpdate({
+		triggerInput: triggerInput,
+		update: "triggerInput"
+	});
+});
+
+// Save response deletion status
+document.addEventListener('DOMContentLoaded', () => {
+	const responseToggle = document.getElementById('toggleResponseDeletion');
+
+	if (responseToggle) {
+		responseToggle.addEventListener('change', () => {
+			const isEnabled = responseToggle.checked;
+
+			submitModerationUpdate({
+				responseStatus: isEnabled,
+				update: "responseStatus"
+			});
+		});
+	}
+});
+
+// Save response time
+document.getElementById('saveResponseButton').addEventListener('click', function (e) {
+	e.preventDefault();
+	
+	const responseInput = parseInt(document.getElementById('responseInput').value, 10) || 0;
+	submitModerationUpdate({
+		responseInput: responseInput,
+		update: "responseInput"
+	});
+});
 
 // Helper functions
 
