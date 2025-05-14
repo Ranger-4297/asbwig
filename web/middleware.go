@@ -204,63 +204,6 @@ func dashboardContextData(w http.ResponseWriter, r *http.Request) map[string]int
 	return responseData
 }
 
-// getGuildData retrieves select data about the guild to use within the manage page of the dashboard
-func getGuildData(guildID string) (guildData map[string]interface{}) {
-	if guildID == "" {
-		return guildData
-	}
-	retrievedGuild, _ := common.Session.Guild(guildID)
-	channels, _ := common.Session.GuildChannels(guildID)
-	roles := retrievedGuild.Roles
-	restrictions := getGuildModerationRestrictions(guildID)
-	sort.SliceStable(channels, func(i, j int) bool {
-		return channels[i].Position < channels[j].Position
-	})
-	sort.SliceStable(roles, func(i, j int) bool {
-		return roles[i].Position > roles[j].Position
-	})
-	modlog := getGuildModLogChannel(guildID)
-	status := getModerationStatus(guildID)
-	guildData = map[string]interface{}{
-		"ID": retrievedGuild.ID,
-		"Name": retrievedGuild.Name,
-		"Avatar": retrievedGuild.IconURL("1024"),
-		"Channels": channels,
-		"Roles": roles,
-		"CommandRestrictions": restrictions,
-		"Modlog": modlog,
-		"ModerationEnabled": status,
-	}
-	if guildData["Avatar"] == "" {
-		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
-	}
-	return guildData
-}
-
-func getGuildModLogChannel(guildID string) string {
-	var logChannel string
-	query := `SELECT mod_log FROM moderation_config WHERE guild_id=$1`
-
-	err := common.PQ.QueryRow(query, guildID).Scan(&logChannel)
-	if err != nil {
-		return ""
-	}
-
-	return logChannel
-}
-
-func getModerationStatus(guildID string) bool {
-	var status bool = false
-	query := `SELECT enabled FROM moderation_config WHERE guild_id=$1`
-	
-	err := common.PQ.QueryRow(query, guildID).Scan(&status)
-	if err != nil {
-		return false
-	}
-
-	return status
-}
-
 // validateGuild ensures users can't access the manage page for guilds without the correct permissions
 func validateGuild(inner http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -292,6 +235,63 @@ func validateGuild(inner http.Handler) http.Handler {
 
         inner.ServeHTTP(w, r)
     })
+}
+
+// getGuildData retrieves select data about the guild to use within the manage page of the dashboard
+func getGuildData(guildID string) (guildData map[string]interface{}) {
+	if guildID == "" {
+		return guildData
+	}
+	retrievedGuild, _ := common.Session.Guild(guildID)
+	channels, _ := common.Session.GuildChannels(guildID)
+	roles := retrievedGuild.Roles
+	sort.SliceStable(channels, func(i, j int) bool {
+		return channels[i].Position < channels[j].Position
+	})
+	sort.SliceStable(roles, func(i, j int) bool {
+		return roles[i].Position > roles[j].Position
+	})
+	moderationData := getGuildModerationSettings(guildID)
+	guildData = map[string]interface{}{
+		"ID": retrievedGuild.ID,
+		"Name": retrievedGuild.Name,
+		"Avatar": retrievedGuild.IconURL("1024"),
+		"Channels": channels,
+		"Roles": roles,
+		"ModerationConfig": moderationData,
+	}
+	if guildData["Avatar"] == "" {
+		guildData["Avatar"] = URL + "/static/img/icons/cross.png"
+	}
+	return guildData
+}
+
+func getGuildModerationSettings(guildID string) map[string]interface{} {
+	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
+	commandRestrictions := map[string]interface{}{
+		"Warn": config.RequiredWarnRoles,
+		"Mute": config.RequiredMuteRoles,
+		"Unmute": config.RequiredUnmuteRoles,
+		"Kick": config.RequiredKickRoles,
+		"Ban": config.RequiredBanRoles,
+		"Unban": config.RequiredUnbanRoles,
+	}
+		triggerSettings := map[string]interface{}{
+		"Enabled": config.EnabledTriggerDeletion,
+		"Seconds": config.SecondsToDeleteTrigger,
+	}
+	responseSettings := map[string]interface{}{
+		"Enabled": config.EnabledResponseDeletion,
+		"Seconds": config.SecondsToDeleteResponse,
+	}
+	moderationSettings := map[string]interface{} {
+		"Enabled": config.Enabled,
+		"Modlog": config.ModLog.String,
+		"Restrictions": commandRestrictions,
+		"TriggerSettings": triggerSettings,
+		"ResponseSettings": responseSettings,
+	}
+	return moderationSettings
 }
 
 // handleUpdatePrefix changes the guilds prefix in the database with the one provided from the dashboard
@@ -360,17 +360,4 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("ok"))
-}
-
-func getGuildModerationRestrictions(guildID string) map[string]interface{} {
-	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
-	commandRestrictions := map[string]interface{}{
-		"Warn": config.RequiredWarnRoles,
-		"Mute": config.RequiredMuteRoles,
-		"Unmute": config.RequiredUnmuteRoles,
-		"Kick": config.RequiredKickRoles,
-		"Ban": config.RequiredBanRoles,
-		"Unban": config.RequiredUnbanRoles,
-	}
-	return commandRestrictions
 }
