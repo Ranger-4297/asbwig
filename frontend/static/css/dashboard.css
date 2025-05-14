@@ -36,6 +36,9 @@ main {
 	overflow-y: auto;
 	scrollbar-gutter: stable;
 }
+h5 {
+	padding: 0;
+}
 
 main::-webkit-scrollbar {
 	width: 10px;
@@ -244,4 +247,9 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 }
 .switch input:checked ~ .knob {
 	transform: translateX(0.9rem) translateY(-50%);
+}
+
+#responseInput:focus, #triggerInput:focus {
+	outline: none;
+	box-shadow: none;
 }
