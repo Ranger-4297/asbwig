@@ -24,15 +24,20 @@
 	</div>
 	<main class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="m-4 w-100">
-			<div class="d-flex align-items-center" style="margin-top: 2px; margin-bottom: 0;">
-				<div class="form-check form-switch" style="min-height: unset;">
-					<label class="switch">
-						<input type="checkbox" id="toggleModeration" {{if .CurrentGuild.ModerationConfig.Enabled}}checked{{end}}>
-						<span class="slider" style="left: 5px;"></span>
-						<span class="knob" style="left: 7px;"></span>
-					</label>
+			<div class="d-flex align-items-center justify-content-between" style="margin-top: 2px; margin-bottom: 0;">
+				<div class="d-flex align-items-center">
+					<div class="form-check form-switch me-2" style="min-height: unset;">
+						<label class="switch">
+							<input type="checkbox" id="toggleModeration" {{if .CurrentGuild.ModerationConfig.Enabled}}checked{{end}}>
+							<span class="slider" style="left: 5px;"></span>
+							<span class="knob" style="left: 7px;"></span>
+						</label>
+					</div>
+					<h2 class="mb-0">Moderation</h2>
 				</div>
-				<h2>Moderation</h2>
+				<button type="submit" id="saveAllButton" class="btn text-light saveAllButton" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">
+					Save all
+				</button>
 			</div>
 			<div class="container-fluid my-4 px-0">
 				<div class="row">
@@ -140,11 +145,6 @@
 					</div>
 					{{end}}
 				</div>
-			</div>
-			<div class="px-0">
-				<button type="submit" id="saveAllButton" class="btn text-light saveAllButton w-100" data-action="all" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey); margin-bottom: 1rem;">
-					Save all
-				</button>
 			</div>
 		</div>
 	</main>
