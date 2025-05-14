@@ -27,7 +27,12 @@
 	</div>
 	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="m-4 w-100">
-			<h2 style="margin-top: 2px">Primary config</h2>
+			<div class="d-flex align-items-center justify-content-between" style="margin-top: 2px; margin-bottom: 0;">
+				<div class="d-flex align-items-center">
+					<h2>Primary config</h2>
+				</div>
+				<a href="{{.URL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light" role="button" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back to server home</a>
+			</div>
 			<div class="container-fluid my-4 px-0">
 				<div class="row row-cols-1 row-cols-md-3 g-4">
 					<div class="col">
