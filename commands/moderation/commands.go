@@ -14,7 +14,6 @@ import (
 	"github.com/RhykerWells/asbwig/common/dcommand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // returns a boolean value on the status of the guild moderation
@@ -24,24 +23,14 @@ func isEnabled(guildID string) bool {
 }
 
 // returns an array of required roles to run the selected command
-func requireRoles(guildID, command string) types.StringArray {
-	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
-	var requiredRoles types.StringArray
-	switch command{
-	case "warn":
-		requiredRoles = config.RequiredWarnRoles
-	case "mute":
-		requiredRoles = config.RequiredMuteRoles
-	case "unmute":
-		requiredRoles = config.RequiredUnmuteRoles
-	case "kick":
-		requiredRoles = config.RequiredKickRoles
-	case "ban":
-		requiredRoles = config.RequiredBanRoles
-	case "unban":
-		requiredRoles = config.RequiredUnbanRoles
+func requireRoles(guildID, command string) []string {
+	requiredRoles, _ := models.ModerationConfigRoles(qm.Where("guild_id = ?", guildID), qm.Where("action_type = ?", command)).All(context.Background(), common.PQ)
+	var roleIDs []string
+	for _, role := range requiredRoles {
+		roleIDs = append(roleIDs, role.RoleID)
 	}
-	return requiredRoles
+
+	return roleIDs
 }
 
 // returns a boolean on whether the user has the current permissions to run the selected command
