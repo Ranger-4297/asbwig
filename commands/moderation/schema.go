@@ -9,13 +9,16 @@ CREATE TABLE IF NOT EXISTS moderation_config (
 	enabled_response_deletion BOOL DEFAULT FALSE NOT NULL,
 	seconds_to_delete_response INT DEFAULT 0 NOT NULL,
 	mod_log TEXT,
-	required_warn_roles TEXT[],
-	required_mute_roles TEXT[],
-	required_unmute_roles TEXT[],
-	required_kick_roles TEXT[],
-	required_ban_roles TEXT[],
-	required_unban_roles TEXT[],
 	last_case_id BIGINT DEFAULT 0 NOT NULL
+);
+`,`
+CREATE TABLE IF NOT EXISTS moderation_config_roles (
+    guild_id TEXT NOT NULL,
+    action_type TEXT NOT NULL,
+    role_id TEXT NOT NULL,
+    PRIMARY KEY (action_type, role_id),
+    CONSTRAINT fk_moderation_config_roles_guild FOREIGN KEY (guild_id)
+        REFERENCES moderation_config (guild_id) ON DELETE CASCADE
 );
 `,`
 CREATE TABLE IF NOT EXISTS moderation_cases (

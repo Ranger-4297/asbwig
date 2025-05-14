@@ -4,9 +4,11 @@
 package models
 
 var TableNames = struct {
-	ModerationCases  string
-	ModerationConfig string
+	ModerationCases       string
+	ModerationConfig      string
+	ModerationConfigRoles string
 }{
-	ModerationCases:  "moderation_cases",
-	ModerationConfig: "moderation_config",
+	ModerationCases:       "moderation_cases",
+	ModerationConfig:      "moderation_config",
+	ModerationConfigRoles: "moderation_config_roles",
 }
