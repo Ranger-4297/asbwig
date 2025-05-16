@@ -16,7 +16,6 @@
 	--logUnban: #00ff7b;
 	
 	/* Boostrap variables */
-	--bs-card-bg: transparent;
 	color: white;
 	font-family: Arial, Helvetica, sans-serif;
 }
@@ -81,6 +80,7 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 }
 
 .card {
+	--bs-card-bg: transparent !important;
 	--bs-card-inner-border-radius: 0 !important;
 	border: 0.2rem solid var(--accentGrey);
 	border-radius: 10px;
