@@ -195,12 +195,6 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 	border-radius: 0px 100px 100px 0px;
 }
 
-@media (max-width: 768px) {
-	#saveAllButton {
-		margin-bottom: 1rem;
-	}
-}
-
 .form-switch, .form-check {
 	padding: 0 !important;
 }
