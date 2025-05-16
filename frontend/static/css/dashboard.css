@@ -29,7 +29,7 @@ body {
 	background-color: var(--basePurple)!important;
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
+	overflow-x: hidden;
 }
 main {
 	flex: 1;
