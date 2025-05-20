@@ -67,7 +67,7 @@ document.getElementById('saveAllButton').addEventListener('click', function (e) 
 		triggerInput: triggerInput,
 		responseInput: responseInput,
 		muteRole: muteRoleInput,
-		updateRoles: JSON.parse(updateRolesInput),
+		updateRoles: updateRolesInput ? JSON.parse(updateRolesInput) : [],
 		update: "all"
 	});
 });
@@ -140,7 +140,7 @@ document.getElementById('saveMuteRolesButton').addEventListener('click', functio
 
 	const updateRolesInput = document.getElementById('updateRolesInput').value.trim();
 	submitModerationUpdate({
-		updateRoles: updateRolesInput,
+		updateRoles:  updateRolesInput ? JSON.parse(updateRolesInput) : [],
 		update: "updateRoles"
 	});
 });
