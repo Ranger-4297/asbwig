@@ -22,7 +22,7 @@ function submitModerationUpdate({ enabled = null, modlog = null, triggerStatus =
 		},
 		body: JSON.stringify(body)
 	}).then(() => {
-		if (enabled == null && responseStatus == null && triggerStatus == null) {
+		if (enabled == null && responseStatus == null && triggerStatus == null && managedMuteRole == null) {
 			console.log(body)
 			const alert = document.getElementById('successAlert');
 			if (alert) {
