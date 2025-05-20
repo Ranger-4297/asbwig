@@ -328,7 +328,7 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 		ResponseInput int `json:"responseInput"`
 		Roles map[string][]string `json:"roles"`
 		MuteRole string `json:"muteRole"`
-		ManagedMuteRole string `json:"managedMuteRole"`
+		ManagedMuteRole bool `json:"managedMuteRole"`
 		UpdateRoles []string `json:"updateRoles"`
 	}
 	json.NewDecoder(r.Body).Decode(&data)
@@ -364,7 +364,7 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 			config.EnabledResponseDeletion = data.ResponseStatus
 		}
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
-	case "triggerInput", "responseInput":
+	case "triggerInput", "responseInput", "manageMuteRole":
 		whitelist := ""
 		switch data.Update {
 		case "triggerInput":
@@ -373,6 +373,9 @@ func handleUpdateModeration(w http.ResponseWriter, r *http.Request) {
 		case "responseInput":
 			whitelist = "seconds_to_delete_response"
 			config.SecondsToDeleteResponse = data.ResponseInput
+		case "manageMuteRole":
+			whitelist = "manage_mute_role"
+			config.ManageMuteRole = data.ManagedMuteRole
 		}
 		config.Upsert(context.Background(), common.PQ, true, []string{"guild_id"}, boil.Whitelist(whitelist), boil.Infer())
 	case "updateRoles":
