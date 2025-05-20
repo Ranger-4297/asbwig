@@ -24,44 +24,72 @@ import (
 
 // ModerationMute is an object representing the database table.
 type ModerationMute struct {
-	GuildID string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	UserID  string            `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	Roles   types.StringArray `boil:"roles" json:"roles" toml:"roles" yaml:"roles"`
+	GuildID  string            `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	UserID   string            `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Roles    types.StringArray `boil:"roles" json:"roles" toml:"roles" yaml:"roles"`
+	UnmuteAt time.Time         `boil:"unmute_at" json:"unmute_at" toml:"unmute_at" yaml:"unmute_at"`
 
 	R *moderationMuteR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationMuteL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationMuteColumns = struct {
-	GuildID string
-	UserID  string
-	Roles   string
+	GuildID  string
+	UserID   string
+	Roles    string
+	UnmuteAt string
 }{
-	GuildID: "guild_id",
-	UserID:  "user_id",
-	Roles:   "roles",
+	GuildID:  "guild_id",
+	UserID:   "user_id",
+	Roles:    "roles",
+	UnmuteAt: "unmute_at",
 }
 
 var ModerationMuteTableColumns = struct {
-	GuildID string
-	UserID  string
-	Roles   string
+	GuildID  string
+	UserID   string
+	Roles    string
+	UnmuteAt string
 }{
-	GuildID: "moderation_mutes.guild_id",
-	UserID:  "moderation_mutes.user_id",
-	Roles:   "moderation_mutes.roles",
+	GuildID:  "moderation_mutes.guild_id",
+	UserID:   "moderation_mutes.user_id",
+	Roles:    "moderation_mutes.roles",
+	UnmuteAt: "moderation_mutes.unmute_at",
 }
 
 // Generated where
 
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var ModerationMuteWhere = struct {
-	GuildID whereHelperstring
-	UserID  whereHelperstring
-	Roles   whereHelpertypes_StringArray
+	GuildID  whereHelperstring
+	UserID   whereHelperstring
+	Roles    whereHelpertypes_StringArray
+	UnmuteAt whereHelpertime_Time
 }{
-	GuildID: whereHelperstring{field: "\"moderation_mutes\".\"guild_id\""},
-	UserID:  whereHelperstring{field: "\"moderation_mutes\".\"user_id\""},
-	Roles:   whereHelpertypes_StringArray{field: "\"moderation_mutes\".\"roles\""},
+	GuildID:  whereHelperstring{field: "\"moderation_mutes\".\"guild_id\""},
+	UserID:   whereHelperstring{field: "\"moderation_mutes\".\"user_id\""},
+	Roles:    whereHelpertypes_StringArray{field: "\"moderation_mutes\".\"roles\""},
+	UnmuteAt: whereHelpertime_Time{field: "\"moderation_mutes\".\"unmute_at\""},
 }
 
 // ModerationMuteRels is where relationship names are stored.
@@ -92,8 +120,8 @@ func (r *moderationMuteR) GetGuild() *ModerationConfig {
 type moderationMuteL struct{}
 
 var (
-	moderationMuteAllColumns            = []string{"guild_id", "user_id", "roles"}
-	moderationMuteColumnsWithoutDefault = []string{"guild_id", "user_id", "roles"}
+	moderationMuteAllColumns            = []string{"guild_id", "user_id", "roles", "unmute_at"}
+	moderationMuteColumnsWithoutDefault = []string{"guild_id", "user_id", "roles", "unmute_at"}
 	moderationMuteColumnsWithDefault    = []string{}
 	moderationMutePrimaryKeyColumns     = []string{"guild_id", "user_id"}
 	moderationMuteGeneratedColumns      = []string{}
