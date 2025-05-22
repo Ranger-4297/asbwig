@@ -54,12 +54,11 @@ func responseDeletion(guildID string) (bool, int) {
 	return config.EnabledResponseDeletion, config.SecondsToDeleteResponse
 }
 
-
 // response returns the fully-populated embed for responses
-func responseEmbed(author, target *discordgo.User, embedDisplay string, action logAction) *discordgo.MessageEmbed {
+func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    fmt.Sprintf("Case type: %s", embedDisplay),
+			Name:    fmt.Sprintf("Case type: %s", action.CaseType),
 			IconURL: author.AvatarURL("1024"),
 		},
 		Description: fmt.Sprintf("%s has successfully %s %s :thumbsup:", author.Mention(), action.Name, target.Mention()),
@@ -114,7 +113,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 		if ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
 		}
-		responseEmbed := responseEmbed(author.User, target.User, "Warning", logWarn)
+		responseEmbed := responseEmbed(author.User, target.User, logWarn)
 		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
 		ok, delay = responseDeletion(data.GuildID)
 			if ok {

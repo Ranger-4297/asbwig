@@ -15,17 +15,18 @@ import (
 )
 
 type logAction struct {
+	CaseType string
 	Name   string
 	Colour int
 }
 
 var (
-	logWarn   = logAction{Name: "Warned", Colour: 0xFCA253}
-	logMute   = logAction{Name: "Muted", Colour: 0x5772BE}
-	logUnmute = logAction{Name: "Unmuted", Colour: common.SuccessGreen}
-	logKick   = logAction{Name: "Kicked", Colour: 0xF2A013}
-	logBan    = logAction{Name: "Banned", Colour: 0xD64848}
-	logUnban  = logAction{Name: "Unbanned", Colour: common.SuccessGreen}
+	logWarn   = logAction{Name: "Warned", CaseType: "Warning", Colour: 0xFCA253}
+	logMute   = logAction{Name: "Muted", CaseType: "Mute",Colour: 0x5772BE}
+	logUnmute = logAction{Name: "Unmuted", CaseType: "Unmute",Colour: common.SuccessGreen}
+	logKick   = logAction{Name: "Kicked", CaseType: "Kick",Colour: 0xF2A013}
+	logBan    = logAction{Name: "Banned", CaseType: "Ban",Colour: 0xD64848}
+	logUnban  = logAction{Name: "Unbanned", CaseType: "Unban",Colour: common.SuccessGreen}
 )
 
 const (
