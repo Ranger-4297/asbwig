@@ -82,32 +82,32 @@ var warnCommand = &dcommand.AsbwigCommand{
 		guild := functions.GetGuild(data.GuildID)
 		if !enabled {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
-			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 30*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 10*time.Second)
 			return
 		}
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		ok := hasCommandPermissions(data.GuildID, author, "warn")
+		ok := hasCommandPermissions(data.GuildID, author, "Warn")
 		if !ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
-			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.", 30*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.", 10*time.Second)
 			return
 		}
 		target, _ := functions.GetMember(data.GuildID, data.Args[0])
 		if target.User.ID == author.User.ID {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
-			functions.SendBasicMessage(data.ChannelID, "You can't warn yourself.", 30*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You can't warn yourself.", 10*time.Second)
 			return
 		}
 		ok = functions.IsMemberHigher(data.GuildID, author, target)
 		if (!ok || target.User.ID == guild.OwnerID) {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
-			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher role).")
+			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher role).", 10*time.Second)
 			return
 		}
 		warnReason := strings.Join(data.Args[1:], " ")
 		err := logCase(data.GuildID, author, target, logWarn, data.ChannelID, warnReason)
 		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 30*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 10*time.Second)
 			return
 		}
 		ok, delay := triggerDeltion(data.GuildID)
