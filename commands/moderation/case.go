@@ -3,10 +3,12 @@ package moderation
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
+	"github.com/RhykerWells/durationutil"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 	"github.com/volatiletech/null/v8"
@@ -89,13 +91,13 @@ func removeFailedCase(caseData models.ModerationCase) {
 
 // Log generation
 
-func logCase(guildID string, Author, Target *discordgo.Member, action logAction, currentChannel, reason string) error {
+func logCase(guildID string, Author, Target *discordgo.Member, action logAction, currentChannel, reason string, duration ...time.Duration) error {
 	logChannel, err := getGuildModLogChannel(guildID)
 	if err != nil {
 		return err
 	}
 	caseID := getNewCaseID(guildID)
-	embed := logEmbed(Author.User, Target.User, caseID, action, currentChannel, reason)
+	embed := logEmbed(Author.User, Target.User, caseID, action, currentChannel, reason, duration...)
 	message, err := functions.SendMessage(logChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
 		return err
@@ -106,9 +108,9 @@ func logCase(guildID string, Author, Target *discordgo.Member, action logAction,
 }
 
 // logEmbed returns the fully-populated embed for moderation logging
-func logEmbed(author, target *discordgo.User, caseNumber int64, action logAction, channelID, reason string) *discordgo.MessageEmbed {
+func logEmbed(author, target *discordgo.User, caseNumber int64, action logAction, channelID, reason string, duration ...time.Duration) *discordgo.MessageEmbed {
 	humanReadableCaseNumber := humanize.Comma(caseNumber)
-	return &discordgo.MessageEmbed{
+	embed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    fmt.Sprintf("%s (ID %s)", author.Username, author.ID),
 			IconURL: author.AvatarURL("1024"),
@@ -116,6 +118,13 @@ func logEmbed(author, target *discordgo.User, caseNumber int64, action logAction
 		Description: fmt.Sprintf("%s **Case number:** %s\n%s **Who:** %s `(ID %s)`\n%s **Action:** %s\n%s **Channel:** <#%s>\n%s **Reason:** %s", caseEmoji, humanReadableCaseNumber, userEmoji, target.Mention(), target.ID, actionEmoji, action.Name, channelEmoji, channelID, reasonEmoji, reason),
 		Color: action.Colour,
 	}
+	if len(duration) > 0 {
+		d := duration[0]
+		embed.Footer = &discordgo.MessageEmbedFooter{
+			Text: fmt.Sprintf("Duration: %s", durationutil.HumanizeDuration(d) ),
+		}
+	}
+	return embed
 }
 
 // generateLogLink returns the full messageURL of the modlog entry
