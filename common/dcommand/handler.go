@@ -9,6 +9,7 @@ import (
 	"github.com/RhykerWells/asbwig/bot/functions"
 	prfx "github.com/RhykerWells/asbwig/bot/prefix"
 	"github.com/RhykerWells/asbwig/common"
+	dutil "github.com/RhykerWells/durationutil"
 	"github.com/bwmarrin/discordgo"
 	"github.com/sirupsen/logrus"
 )
@@ -185,6 +186,11 @@ func handleInvalidArgs(cmd AsbwigCommand, data *Data) (*discordgo.MessageEmbed, 
 		case "*dcommand.ResponseType":
 			if input != "work" && input != "crime" {
 				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nPlease provide `work` or `crime`", errorMessage)), true
+			}
+		case "*dcommand.DurationArg":
+			_, err := dutil.ToDuration(input)
+			if err != nil {
+				return errorEmbed(cmd.Command, data, fmt.Sprintf("%s\nExample: `1y2mo3d`.\nUnits: `y(ears)`, `mo(nths)`, `w(eeks)`, `d(ays)`, `h(ours)`, `m(inutes)`.", errorMessage)), true
 			}
 		default:
 			return errorEmbed(cmd.Command, data, "Something went wrong handling the arguments."), true
