@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
+	github.com/RhykerWells/durationutil v1.0.1
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/friendsofgo/errors v0.9.2
 	github.com/lib/pq v1.10.9
