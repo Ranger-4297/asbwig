@@ -253,6 +253,8 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		return roles[i].Position > roles[j].Position
 	})
 	moderationData := getGuildModerationSettings(guildID)
+	member, _ := functions.GetMember(retrievedGuild.ID, common.Bot.ID)
+	role := functions.HighestRole(retrievedGuild.ID, member)
 	guildData = map[string]interface{}{
 		"ID": retrievedGuild.ID,
 		"Name": retrievedGuild.Name,
@@ -260,6 +262,7 @@ func getGuildData(guildID string) (guildData map[string]interface{}) {
 		"Channels": channels,
 		"Roles": roles,
 		"ModerationConfig": moderationData,
+		"BotHighestRolePosition": role.Position,
 	}
 	if guildData["Avatar"] == "" {
 		guildData["Avatar"] = URL + "/static/img/icons/cross.png"

@@ -185,7 +185,7 @@
 										{{if or (eq .ID $.CurrentGuild.ID) .Managed}}
 										{{continue}}
 										{{end}}
-										<li><a class="dropdown-item roleListItem" data-value="{{.ID}}">{{.Name}}</a></li>
+										<li><a class="dropdown-item roleListItem {{if lt $.CurrentGuild.BotHighestRolePosition .Position}}disabled{{end}}" data-value="{{.ID}}">{{.Name}} {{if lt $.CurrentGuild.BotHighestRolePosition .Position}}(bot higher than role){{end}}</a></li>
 										{{end}}
 									</ul>
 									<input type="hidden" id="muteRoleInput">
@@ -214,8 +214,9 @@
 										{{end}}
 										<li>
 											<label class="dropdown-item">
-												<input type="checkbox" class="muteRoleCheckbox me-2" value="{{.ID}}">
+												<input type="checkbox" class="muteRoleCheckbox me-2 {{if lt $.CurrentGuild.BotHighestRolePosition .Position}}disabled{{end}}" value="{{.ID}}" {{if lt $.CurrentGuild.BotHighestRolePosition .Position}}disabled{{end}}>
 												{{.Name}}
+												{{if lt $.CurrentGuild.BotHighestRolePosition .Position}} (bot higher than role){{end}}
 											</label>
 										</li>
 										{{end}}
