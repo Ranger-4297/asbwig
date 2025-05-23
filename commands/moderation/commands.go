@@ -78,12 +78,12 @@ var warnCommand = &dcommand.AsbwigCommand{
 	ArgsRequired: 2,
 	Run: func(data *dcommand.Data) {
 		enabled := isEnabled(data.GuildID)
-		guild := functions.GetGuild(data.GuildID)
 		if !enabled {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
 			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 10*time.Second)
 			return
 		}
+		guild := functions.GetGuild(data.GuildID)
 		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
 		ok := hasCommandPermissions(data.GuildID, author, "Warn")
 		if !ok {
