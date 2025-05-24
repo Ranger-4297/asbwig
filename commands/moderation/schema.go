@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS moderation_mutes (
 CREATE TABLE IF NOT EXISTS moderation_bans (
     guild_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
-	unmute_at TIMESTAMP NOT NULL,
+	unban_at TIMESTAMP NOT NULL,
     PRIMARY KEY (guild_id, user_id),
     CONSTRAINT fk_moderation_config_roles_guild FOREIGN KEY (guild_id)
         REFERENCES moderation_config (guild_id) ON DELETE CASCADE

@@ -23,32 +23,32 @@ import (
 
 // ModerationBan is an object representing the database table.
 type ModerationBan struct {
-	GuildID  string    `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
-	UserID   string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	UnmuteAt time.Time `boil:"unmute_at" json:"unmute_at" toml:"unmute_at" yaml:"unmute_at"`
+	GuildID string    `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
+	UserID  string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	UnbanAt time.Time `boil:"unban_at" json:"unban_at" toml:"unban_at" yaml:"unban_at"`
 
 	R *moderationBanR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationBanL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ModerationBanColumns = struct {
-	GuildID  string
-	UserID   string
-	UnmuteAt string
+	GuildID string
+	UserID  string
+	UnbanAt string
 }{
-	GuildID:  "guild_id",
-	UserID:   "user_id",
-	UnmuteAt: "unmute_at",
+	GuildID: "guild_id",
+	UserID:  "user_id",
+	UnbanAt: "unban_at",
 }
 
 var ModerationBanTableColumns = struct {
-	GuildID  string
-	UserID   string
-	UnmuteAt string
+	GuildID string
+	UserID  string
+	UnbanAt string
 }{
-	GuildID:  "moderation_bans.guild_id",
-	UserID:   "moderation_bans.user_id",
-	UnmuteAt: "moderation_bans.unmute_at",
+	GuildID: "moderation_bans.guild_id",
+	UserID:  "moderation_bans.user_id",
+	UnbanAt: "moderation_bans.unban_at",
 }
 
 // Generated where
@@ -106,13 +106,13 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var ModerationBanWhere = struct {
-	GuildID  whereHelperstring
-	UserID   whereHelperstring
-	UnmuteAt whereHelpertime_Time
+	GuildID whereHelperstring
+	UserID  whereHelperstring
+	UnbanAt whereHelpertime_Time
 }{
-	GuildID:  whereHelperstring{field: "\"moderation_bans\".\"guild_id\""},
-	UserID:   whereHelperstring{field: "\"moderation_bans\".\"user_id\""},
-	UnmuteAt: whereHelpertime_Time{field: "\"moderation_bans\".\"unmute_at\""},
+	GuildID: whereHelperstring{field: "\"moderation_bans\".\"guild_id\""},
+	UserID:  whereHelperstring{field: "\"moderation_bans\".\"user_id\""},
+	UnbanAt: whereHelpertime_Time{field: "\"moderation_bans\".\"unban_at\""},
 }
 
 // ModerationBanRels is where relationship names are stored.
@@ -143,8 +143,8 @@ func (r *moderationBanR) GetGuild() *ModerationConfig {
 type moderationBanL struct{}
 
 var (
-	moderationBanAllColumns            = []string{"guild_id", "user_id", "unmute_at"}
-	moderationBanColumnsWithoutDefault = []string{"guild_id", "user_id", "unmute_at"}
+	moderationBanAllColumns            = []string{"guild_id", "user_id", "unban_at"}
+	moderationBanColumnsWithoutDefault = []string{"guild_id", "user_id", "unban_at"}
 	moderationBanColumnsWithDefault    = []string{}
 	moderationBanPrimaryKeyColumns     = []string{"guild_id", "user_id"}
 	moderationBanGeneratedColumns      = []string{}
