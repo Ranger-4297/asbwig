@@ -3,6 +3,7 @@ package moderation
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
@@ -129,4 +130,17 @@ func scheduleAllPendingUnmutes() {
 	for _, mute := range mutes {
 		scheduleUnmute(mute.GuildID, mute.UserID, mute.UnmuteAt)
 	}
+}
+
+func kickUser(guildID, author, target, reason string) error {
+	_, err := functions.GetMember(guildID, target)
+	if err != nil {
+		return errNotMember
+	}
+
+	authorMember, _ := functions.GetMember(guildID, author)
+	auditLogReason := fmt.Sprintf("%s: %s", authorMember.User.Username, reason)
+
+	functions.GuildKickMember(guildID, target, auditLogReason)
+	return nil
 }
