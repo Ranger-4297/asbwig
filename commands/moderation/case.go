@@ -12,8 +12,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dustin/go-humanize"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type logAction struct {
@@ -91,6 +91,7 @@ func removeFailedCase(caseData models.ModerationCase) {
 
 // Log generation
 
+// logCase runs the generation of the modlog embed and case upsertion. Returning an error if it wasn't complete
 func logCase(guildID string, Author, Target *discordgo.Member, action logAction, currentChannel, reason string, duration ...time.Duration) error {
 	logChannel, err := getGuildModLogChannel(guildID)
 	if err != nil {
