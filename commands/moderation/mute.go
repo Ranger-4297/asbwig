@@ -3,6 +3,7 @@ package moderation
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/RhykerWells/asbwig/bot/functions"
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
@@ -67,4 +68,28 @@ func unmuteUser(guildID string, author, target string) error {
 	}
 
 	return nil
+}
+
+func scheduleUnmute(guildID string, target string, unmuteTime time.Time) {
+	delay := time.Until(unmuteTime)
+	if delay <= 0 {
+		go unmuteUser(guildID, common.Bot.ID, target)
+		return
+	}
+
+	go func() {
+		time.Sleep(time.Until(unmuteTime))
+		unmuteUser(guildID, common.Bot.ID, target)
+	}()
+}
+
+func scheduleAllPendingUnmutes() {
+	mutes, err := models.ModerationMutes(qm.Where("unmute_at > ?", time.Now())).All(context.Background(), common.PQ)
+	if err != nil {
+		return
+	}
+
+	for _, mute := range mutes {
+		scheduleUnmute(mute.GuildID, mute.UserID, mute.UnmuteAt)
+	}
 }
