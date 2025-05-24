@@ -116,7 +116,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 		responseEmbed := responseEmbed(author.User, target.User, logWarn)
 		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
 		ok, delay = responseDeletion(data.GuildID)
-			if ok {
+		if ok {
 			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
 		}
 	},
