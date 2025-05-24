@@ -18,6 +18,7 @@ func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 		warnCommand,
 		muteCommand,
 		unmuteCommand,
+		kickCommand,
 	)
 }
 

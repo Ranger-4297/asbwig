@@ -285,3 +285,72 @@ var unmuteCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
+var kickCommand = &dcommand.AsbwigCommand{
+	Command:     "kick",
+	Category:    dcommand.CategoryModeration,
+	Aliases:     []string{""},
+	Description: "Kicks a user for a specified reason",
+	Args: []*dcommand.Args{
+		{Name: "User", Type: dcommand.User},
+		{Name: "Reason", Type: dcommand.String},
+	},
+	ArgsRequired: 2,
+	Run: func(data *dcommand.Data) {
+		enabled := isEnabled(data.GuildID)
+		if !enabled {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 10*time.Second)
+			return
+		}
+		guild := functions.GetGuild(data.GuildID)
+		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+		ok := hasCommandPermissions(data.GuildID, author, "Kick")
+		if !ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.", 10*time.Second)
+			return
+		}
+		target, _ := functions.GetMember(data.GuildID, data.Args[0])
+		if target.User.ID == author.User.ID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You can't kick yourself.", 10*time.Second)
+			return
+		}
+		ok = functions.IsMemberHigher(data.GuildID, author, target)
+		if !ok || target.User.ID == guild.OwnerID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to warn this user (target has higher role).", 10*time.Second)
+			return
+		}
+		kickReason := strings.Join(data.Args[1:], " ")
+		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionKickMembers)
+		if !ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `kick_members`", 10*time.Second)
+			return
+		}
+		_, err := getGuildModLogChannel(data.GuildID)
+		if err != nil {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command", 10*time.Second)
+			return
+		}
+		err = kickUser(data.GuildID, author.User.ID, target.User.ID, kickReason)
+		if err != nil {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "This user is not in the server.", 10*time.Second)
+			return
+		}
+		logCase(data.GuildID, author, target, logKick, data.ChannelID, kickReason)
+		ok, delay := triggerDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+		}
+		responseEmbed := responseEmbed(author.User, target.User, logKick)
+		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+		ok, delay = responseDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+		}
+	},
+}
