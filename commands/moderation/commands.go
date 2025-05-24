@@ -44,7 +44,7 @@ func hasCommandPermissions(guildID string, user *discordgo.Member, requireType s
 	return false
 }
 
-func triggerDeltion(guildID string) (bool, int) {
+func triggerDeletion(guildID string) (bool, int) {
 	config, _ := models.ModerationConfigs(qm.Where("guild_id=?", guildID)).One(context.Background(), common.PQ)
 	return config.EnabledTriggerDeletion, config.SecondsToDeleteTrigger
 }
@@ -109,7 +109,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 10*time.Second)
 			return
 		}
-		ok, delay := triggerDeltion(data.GuildID)
+		ok, delay := triggerDeletion(data.GuildID)
 		if ok {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
 		}
