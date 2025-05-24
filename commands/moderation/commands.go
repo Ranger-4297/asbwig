@@ -106,7 +106,7 @@ var warnCommand = &dcommand.AsbwigCommand{
 		warnReason := strings.Join(data.Args[1:], " ")
 		err := logCase(data.GuildID, author, target, logWarn, data.ChannelID, warnReason)
 		if err != nil {
-			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel before running this command", 10*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command", 10*time.Second)
 			return
 		}
 		ok, delay := triggerDeletion(data.GuildID)
