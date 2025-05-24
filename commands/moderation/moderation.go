@@ -38,5 +38,10 @@ func getGuildModLogChannel(guildID string) (string, error) {
 		return "", errors.New("no modlog channel found")
 	}
 
+	ok := util.HasPerms(guildID, logChannel, common.Bot.ID, discordgo.PermissionSendMessages)
+	if !ok {
+		return "", errors.New("cannot send message in the modlog channel")
+	}
+
 	return logChannel, nil
 }
