@@ -133,7 +133,7 @@ var muteCommand = &dcommand.AsbwigCommand{
 		{Name: "Duration", Type: dcommand.Duration},
 		{Name: "Reason", Type: dcommand.String},
 	},
-	ArgsRequired: 2,
+	ArgsRequired: 3,
 	Run: func(data *dcommand.Data) {
 		enabled := isEnabled(data.GuildID)
 		if !enabled {
