@@ -19,6 +19,16 @@ func GetGuild(guildID string) *discordgo.Guild {
 	return guild
 }
 
+// GuildKickMember kicks a user from the current guild
+func GuildKickMember(guildID, userID, reason string) {
+	common.Session.GuildMemberDeleteWithReason(guildID, userID, reason)
+}
+
+// GuildBanMember bans a user from the current guild
+func GuildBanMember(guildID, userID, reason string) {
+	common.Session.GuildBanCreateWithReason(guildID, userID, reason, 0)
+}
+
 // Message functions
 
 // SendBasicMessage sends a string as message content to the given channel
