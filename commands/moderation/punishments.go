@@ -144,3 +144,16 @@ func kickUser(guildID, author, target, reason string) error {
 	functions.GuildKickMember(guildID, target, auditLogReason)
 	return nil
 }
+
+func banUser(guildID, author, target, reason string) error {
+	_, err := functions.GetMember(guildID, target)
+	if err != nil {
+		return errNotMember
+	}
+
+	authorMember, _ := functions.GetMember(guildID, author)
+	auditLogReason := fmt.Sprintf("%s: %s", authorMember.User.Username, reason)
+
+	functions.GuildBanMember(guildID, target, auditLogReason)
+	return nil
+}
