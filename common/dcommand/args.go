@@ -15,6 +15,7 @@ var (
 	String = &StringArg{}
 	Int    = &IntArg{}
 	User   = &UserArg{}
+	Member = &MemberArg{}
 	Channel = &ChannelArg{}
 	Bet = &BetArg{}
 	Duration = &DurationArg{}
@@ -44,6 +45,12 @@ func (i *IntArg) Help() string {
 type UserArg struct{}
 var _ ArgumentType = (*UserArg)(nil)
 func (u *UserArg) Help() string {
+	return "Mention/ID"
+}
+
+type MemberArg struct{}
+var _ ArgumentType = (*MemberArg)(nil)
+func (m *MemberArg) Help() string {
 	return "Mention/ID"
 }
 
