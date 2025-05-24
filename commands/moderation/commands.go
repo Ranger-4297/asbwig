@@ -229,7 +229,7 @@ var unmuteCommand = &dcommand.AsbwigCommand{
 		target, _ := functions.GetMember(data.GuildID, data.Args[0])
 		if target.User.ID == author.User.ID {
 			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
-			functions.SendBasicMessage(data.ChannelID, "You can't unmuted yourself.", 10*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You can't unmute yourself.", 10*time.Second)
 			return
 		}
 		ok = functions.IsMemberHigher(data.GuildID, author, target)
