@@ -3,16 +3,21 @@ package moderation
 import (
 	"errors"
 
+	"github.com/RhykerWells/asbwig/commands/util"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/RhykerWells/asbwig/common/dcommand"
+	"github.com/bwmarrin/discordgo"
 )
 
 //go:generate sqlboiler --no-hooks psql
 
 func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 	common.InitSchema("Moderation", GuildModerationSchema...)
+	scheduleAllPendingUnmutes()
 	cmdHandler.RegisterCommands(
 		warnCommand,
+		muteCommand,
+		unmuteCommand,
 	)
 }
 
