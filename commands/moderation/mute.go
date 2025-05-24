@@ -9,6 +9,7 @@ import (
 	"github.com/RhykerWells/asbwig/commands/moderation/models"
 	"github.com/RhykerWells/asbwig/common"
 	"github.com/bwmarrin/discordgo"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -28,6 +29,42 @@ func RefreshMuteSettings(guildID string) {
 	for _, channel := range channels {
 		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole.String,  discordgo.PermissionOverwriteTypeRole, 0, discordgo.PermissionSendMessages)
 	}
+}
+
+func muteUser(guildID string, target string, duration time.Duration) error {
+	moderationConfig, _ := models.ModerationConfigs(qm.Where("guild_id = ?", guildID)).One(context.Background(), common.PQ)
+	err := functions.AddRole(guildID, target, moderationConfig.MuteRole.String)
+	if err != nil {
+		return err
+	}
+	rolesRemoved := []string{}
+	member, _ := functions.GetMember(guildID, target)
+	if len(moderationConfig.UpdateRoles) > 0 {
+		roleSet := make(map[string]struct{}, len(moderationConfig.UpdateRoles))
+		for _, role := range moderationConfig.UpdateRoles {
+			roleSet[role] = struct{}{}
+		}
+
+		for _, userRole := range member.Roles {
+			if _, exists := roleSet[userRole]; exists {
+				rolesRemoved = append(rolesRemoved, userRole)
+				functions.RemoveRole(guildID, target, userRole)
+			}
+		}
+	}
+
+	unmuteTime := time.Now().Add(duration)
+	muteEntry := models.ModerationMute{
+		GuildID: guildID,
+		UserID: target,
+		Roles: rolesRemoved,
+		UnmuteAt: unmuteTime,
+	}
+	muteEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unmute_at"), boil.Infer())
+
+	scheduleUnmute(guildID, target, unmuteTime)
+
+	return nil
 }
 
 var (
