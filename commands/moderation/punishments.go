@@ -70,6 +70,8 @@ func muteUser(guildID string, target string, duration time.Duration) error {
 
 var (
 	errNotMuted = errors.New("user not muted")
+	errAlreadyBanned = errors.New("user already banned")
+	errNotBanned = errors.New("user not banned")
 	errNotMember = errors.New("user not a member")
 )
 
@@ -145,15 +147,63 @@ func kickUser(guildID, author, target, reason string) error {
 	return nil
 }
 
-func banUser(guildID, author, target, reason string) error {
-	_, err := functions.GetMember(guildID, target)
-	if err != nil {
-		return errNotMember
+func banUser(guildID, author, target, reason string, duration time.Duration) error {
+	_, err := common.Session.GuildBan(guildID, target)
+	if err == nil {
+		return errAlreadyBanned
 	}
-
 	authorMember, _ := functions.GetMember(guildID, author)
 	auditLogReason := fmt.Sprintf("%s: %s", authorMember.User.Username, reason)
 
+	unbanTime := time.Now().Add(duration)
 	functions.GuildBanMember(guildID, target, auditLogReason)
+
+	banEntry := models.ModerationBan{
+		GuildID: guildID,
+		UserID: target,
+		UnbanAt: unbanTime,
+	}
+	banEntry.Upsert(context.Background(), common.PQ, true, []string{"guild_id", "user_id"}, boil.Whitelist("unban_at"), boil.Infer())
+
+	scheduleUnban(guildID, target, unbanTime)
 	return nil
+}
+
+func unbanUser(guildID string, author, target string) error {
+	err := functions.GuildUnbanMember(guildID, target)
+	if err != nil {
+		return errNotBanned
+	}
+
+	targetUser, _ := functions.GetUser(target)
+	targetMember := &discordgo.Member{
+		User: targetUser,
+	}
+
+	if author == common.Bot.ID {
+		modlogChannel, _ := getGuildModLogChannel(guildID)
+		botMember, _ := functions.GetMember(guildID, common.Bot.ID)
+		logCase(guildID, botMember, targetMember, logUnban, modlogChannel, "Automatic unban")
+	}
+
+	banUser, err := models.ModerationBans(qm.Where("guild_id = ?", guildID), qm.Where("user_id = ?", target)).One(context.Background(), common.PQ)
+
+	if err != nil {
+		banUser.Delete(context.Background(), common.PQ)
+	}
+
+	return nil
+}
+
+func scheduleUnban(guildID string, target string, unmuteTime time.Time) {
+	delay := time.Until(unmuteTime)
+	if delay <= 0 {
+		go unbanUser(guildID, common.Bot.ID, target)
+		return
+	}
+
+	go func() {
+		time.Sleep(time.Until(unmuteTime))
+		unbanUser(guildID, common.Bot.ID, target)
+	}()
 }
