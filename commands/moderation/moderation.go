@@ -19,6 +19,8 @@ func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
 		muteCommand,
 		unmuteCommand,
 		kickCommand,
+		banCommand,
+		unbanCommand,
 	)
 }
 

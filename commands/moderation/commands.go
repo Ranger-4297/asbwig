@@ -354,3 +354,149 @@ var kickCommand = &dcommand.AsbwigCommand{
 		}
 	},
 }
+var banCommand = &dcommand.AsbwigCommand{
+	Command:     "ban",
+	Category:    dcommand.CategoryModeration,
+	Aliases:     []string{""},
+	Description: "Bans a user for specified duration and reason",
+	Args: []*dcommand.Args{
+		{Name: "User", Type: dcommand.User},
+		{Name: "Duration", Type: dcommand.Duration},
+		{Name: "Reason", Type: dcommand.String},
+	},
+	ArgsRequired: 3,
+	Run: func(data *dcommand.Data) {
+		enabled := isEnabled(data.GuildID)
+		if !enabled {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 10*time.Second)
+			return
+		}
+		guild := functions.GetGuild(data.GuildID)
+		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+		ok := hasCommandPermissions(data.GuildID, author, "Ban")
+		if !ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.", 10*time.Second)
+			return
+		}
+		targetUser, _ := functions.GetUser(data.Args[0])
+		target := &discordgo.Member{
+			User: targetUser,
+		}
+		if target.User.ID == author.User.ID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You can't ban yourself.", 10*time.Second)
+			return
+		}
+		ok = functions.IsMemberHigher(data.GuildID, author, target)
+		if !ok || target.User.ID == guild.OwnerID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to ban this user (target has higher role).", 10*time.Second)
+			return
+		}
+		banReason := strings.Join(data.Args[2:], " ")
+		duration, _ := durationutil.ToDuration(data.Args[1])
+		if duration < 10*time.Minute {
+			duration = 10 * time.Minute
+		}
+		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
+		if !ok {
+			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`", 10*time.Second)
+			return
+		}
+		_, err := getGuildModLogChannel(data.GuildID)
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command", 10*time.Second)
+			return
+		}
+		err = banUser(data.GuildID, author.User.ID, target.User.ID, banReason, duration)
+		if err != nil {
+			functions.SendBasicMessage(data.ChannelID, "This user is already banned.", 10*time.Second)
+			return
+		}
+		logCase(data.GuildID, author, target, logBan, data.ChannelID, banReason, duration)
+		ok, delay := triggerDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+		}
+		responseEmbed := responseEmbed(author.User, target.User, logBan)
+		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+		ok, delay = responseDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+		}
+	},
+}
+var unbanCommand = &dcommand.AsbwigCommand{
+	Command:     "unban",
+	Category:    dcommand.CategoryModeration,
+	Aliases:     []string{""},
+	Description: "Unbans a user for a specified reason",
+	Args: []*dcommand.Args{
+		{Name: "User", Type: dcommand.User},
+		{Name: "Reason", Type: dcommand.String},
+	},
+	ArgsRequired: 2,
+	Run: func(data *dcommand.Data) {
+		enabled := isEnabled(data.GuildID)
+		if !enabled {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "The moderation system has not been enabled please enable it on the dashboard.", 10*time.Second)
+			return
+		}
+		guild := functions.GetGuild(data.GuildID)
+		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
+		ok := hasCommandPermissions(data.GuildID, author, "Unban")
+		if !ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the required roles for this command.", 10*time.Second)
+			return
+		}
+		targetUser, _ := functions.GetUser(data.Args[0])
+		target := &discordgo.Member{
+			User: targetUser,
+		}
+		if target.User.ID == author.User.ID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You can't unban yourself.", 10*time.Second)
+			return
+		}
+		ok = functions.IsMemberHigher(data.GuildID, author, target)
+		if !ok || target.User.ID == guild.OwnerID {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "You don't have the correct permissions to unban this user (target has higher role).", 10*time.Second)
+			return
+		}
+		unbanReason := strings.Join(data.Args[1:], " ")
+		ok = util.HasPerms(data.GuildID, data.ChannelID, common.Bot.ID, discordgo.PermissionBanMembers)
+		if !ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "I don't have the required permissions to run this command.\nRequires: `ban_members`", 10*time.Second)
+			return
+		}
+		_, err := getGuildModLogChannel(data.GuildID)
+		if err != nil {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command", 10*time.Second)
+			return
+		}
+		err = unbanUser(data.GuildID, data.Author.ID, target.User.ID)
+		if err == errNotBanned {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, 1*time.Second)
+			functions.SendBasicMessage(data.ChannelID, "This user is not banned.", 10*time.Second)
+			return
+		}
+		logCase(data.GuildID, author, target, logUnban, data.ChannelID, unbanReason)
+		ok, delay := triggerDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+		}
+		responseEmbed := responseEmbed(author.User, target.User, logUnban)
+		message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+		ok, delay = responseDeletion(data.GuildID)
+		if ok {
+			functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+		}
+	},
+}
