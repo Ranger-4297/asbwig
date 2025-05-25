@@ -29,6 +29,12 @@ func GuildBanMember(guildID, userID, reason string) {
 	common.Session.GuildBanCreateWithReason(guildID, userID, reason, 0)
 }
 
+// GuildUnbanMember unbans a member from the current guild
+func GuildUnbanMember(guildID, userID string) error {
+	err := common.Session.GuildBanDelete(guildID, userID)
+	return err
+}
+
 // Message functions
 
 // SendBasicMessage sends a string as message content to the given channel
