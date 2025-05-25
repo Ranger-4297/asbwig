@@ -92,19 +92,19 @@ func removeFailedCase(caseData models.ModerationCase) {
 // Log generation
 
 // logCase runs the generation of the modlog embed and case upsertion. Returning an error if it wasn't complete
-func logCase(guildID string, Author, Target *discordgo.Member, action logAction, currentChannel, reason string, duration ...time.Duration) error {
+func logCase(guildID string, Author, target *discordgo.Member, action logAction, currentChannel, reason string, duration ...time.Duration) error {
 	logChannel, err := getGuildModLogChannel(guildID)
 	if err != nil {
 		return err
 	}
 	caseID := getNewCaseID(guildID)
-	embed := logEmbed(Author.User, Target.User, caseID, action, currentChannel, reason, duration...)
+	embed := logEmbed(Author.User, target.User, caseID, action, currentChannel, reason, duration...)
 	message, err := functions.SendMessage(logChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
 		return err
 	}
 	loglink := generateLogLink(guildID, logChannel, message.ID)
-	caseUpsert(caseID, guildID, Author.User.ID, Target.User.ID, reason, loglink, action)
+	caseUpsert(caseID, guildID, Author.User.ID, target.User.ID, reason, loglink, action)
 	return nil
 }
 
